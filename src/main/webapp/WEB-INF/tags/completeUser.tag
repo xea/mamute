@@ -14,6 +14,22 @@
 		</c:if>
 	>
 		<tags:userProfileLink user="${user}" htmlClass="user-name ellipsis" microdata="${microdata}"/>
+            <c:if test="${user.badges.size() > 0}">
+                <span class="badge-bar">
+                    <c:if test="${user.goldBadges.size() > 0}">
+                        <span class="badge-ball badge-gold"></span>
+                        ${user.goldBadges.size()}
+                    </c:if>
+                    <c:if test="${user.silverBadges.size() > 0}">
+                        <span class="badge-ball badge-silver"></span>
+                        ${user.silverBadges.size()}
+                    </c:if>
+                    <c:if test="${user.bronzeBadges.size() > 0}">
+                        <span class="badge-ball badge-bronze"></span>
+                        ${user.bronzeBadges.size()}
+                    </c:if>
+                </span>
+            </c:if>
 		<div title="${t['touch.karma.title']}" class="user-karma ellipsis">${user.karma}<tags:pluralize key="touch.karma" count="${user.karma}" /></div>
 	</div>
 </div>

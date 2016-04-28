@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.inject.Vetoed;
 import javax.persistence.*;
@@ -96,6 +97,10 @@ public class User implements Identifiable {
 
 	@OneToMany(mappedBy="user")
 	private final List<LoginMethod> loginMethods = new ArrayList<>();
+
+	@OneToMany(mappedBy="user")
+//	@JoinTable(name = "Badges")
+	private final List<Badge> badges = new ArrayList<>();
 
 	public static final User GHOST;
 
@@ -436,5 +441,25 @@ public class User implements Identifiable {
 
 	public boolean receiveAllUpdates() {
 		return receiveAllUpdates;
+	}
+
+	public List<Badge> getBadges() {
+		return badges;
+	}
+
+	public List<Badge> getBadgesByClass(final BadgeClass badgeClass) {
+		return badges.stream().filter(b -> BadgeType.valueOf(b.getBadgeKey()).getBadgeClass().equals(badgeClass)).collect(Collectors.toList());
+	}
+
+	public List<Badge> getGoldBadges() {
+		return getBadgesByClass(BadgeClass.GOLD);
+	}
+
+	public List<Badge> getSilverBadges() {
+		return getBadgesByClass(BadgeClass.SILVER);
+	}
+
+	public List<Badge> getBronzeBadges() {
+		return getBadgesByClass(BadgeClass.BRONZE);
 	}
 }
