@@ -72,6 +72,22 @@
 										<span class="reputation" >(${currentUser.current.karma})</span>
 									</jsp:attribute>
 								</tags:userProfileLink>
+								<c:if test="${currentUser.current.badges.size() > 0}">
+                                    <span class="badge">
+                                        <c:if test="${currentUser.current.goldBadges.size() > 0}">
+                                            <span class="badge-ball badge-gold"></span>
+                                            ${currentUser.current.goldBadges.size()}
+                                        </c:if>
+                                        <c:if test="${currentUser.current.silverBadges.size() > 0}">
+                                            <span class="badge-ball badge-silver"></span>
+                                            ${currentUser.current.silverBadges.size()}
+                                        </c:if>
+                                        <c:if test="${currentUser.current.bronzeBadges.size() > 0}">
+                                            <span class="badge-ball badge-bronze"></span>
+                                            ${currentUser.current.bronzeBadges.size()}
+                                        </c:if>
+                                    </span>
+								</c:if>
 							</li>
 							<c:if test="${currentUser.canModerate(environmentKarma)}">
 								<li class="nav-item">
