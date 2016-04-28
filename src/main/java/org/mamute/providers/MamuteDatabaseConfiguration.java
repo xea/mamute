@@ -95,7 +95,7 @@ public class MamuteDatabaseConfiguration {
 		cfg.addAnnotatedClass(LoginMethod.class);
 		cfg.addAnnotatedClass(UserSession.class);
 		cfg.addAnnotatedClass(Watcher.class);
-		cfg.addAnnotatedClass(ReputationEveSnt.class);
+		cfg.addAnnotatedClass(ReputationEvent.class);
 		cfg.addAnnotatedClass(News.class);
 		cfg.addAnnotatedClass(NewsInformation.class);
 		cfg.addAnnotatedClass(NewsletterSentLog.class);

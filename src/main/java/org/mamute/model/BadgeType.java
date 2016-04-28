@@ -20,6 +20,10 @@ public enum BadgeType {
         return id;
     }
 
+    public String getDescriptionId() {
+        return id + ".description";
+    }
+
     public BadgeClass getBadgeClass() {
         return badgeClass;
     }
