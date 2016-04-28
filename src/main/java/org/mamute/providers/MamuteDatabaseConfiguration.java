@@ -95,7 +95,7 @@ public class MamuteDatabaseConfiguration {
 		cfg.addAnnotatedClass(LoginMethod.class);
 		cfg.addAnnotatedClass(UserSession.class);
 		cfg.addAnnotatedClass(Watcher.class);
-		cfg.addAnnotatedClass(ReputationEvent.class);
+		cfg.addAnnotatedClass(ReputationEveSnt.class);
 		cfg.addAnnotatedClass(News.class);
 		cfg.addAnnotatedClass(NewsInformation.class);
 		cfg.addAnnotatedClass(NewsletterSentLog.class);
@@ -103,6 +103,7 @@ public class MamuteDatabaseConfiguration {
 		cfg.addAnnotatedClass(Attachment.class);
 		cfg.addAnnotatedClass(BlockedIp.class);
 		cfg.addAnnotatedClass(Badge.class);
+		cfg.addAnnotatedClass(UserConfig.class);
 	}
 
 	public Map<Object, Object> getProperties() {

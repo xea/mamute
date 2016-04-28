@@ -99,8 +99,10 @@ public class User implements Identifiable {
 	private final List<LoginMethod> loginMethods = new ArrayList<>();
 
 	@OneToMany(mappedBy="user")
-//	@JoinTable(name = "Badges")
 	private final List<Badge> badges = new ArrayList<>();
+
+	@OneToMany(mappedBy="user")
+	private final List<UserConfig> userConfigs = new ArrayList<>();
 
 	public static final User GHOST;
 
@@ -461,5 +463,9 @@ public class User implements Identifiable {
 
 	public List<Badge> getBronzeBadges() {
 		return getBadgesByClass(BadgeClass.BRONZE);
+	}
+
+	public List<UserConfig> getUserConfigs() {
+		return userConfigs;
 	}
 }
