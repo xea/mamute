@@ -7,6 +7,8 @@ import static org.mamute.model.SanitizedText.fromTrustedText;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -284,9 +286,11 @@ public class LDAPApi {
 		}
 
 		private LdapConnection connection(String username, String password) throws LdapException {
-			final String[] hostnames = host.split(";");
+			final List<String> hostnames = Arrays.asList(host.split(";"));
 
 			LdapException lastException = null;
+
+			Collections.shuffle(hostnames);
 
 			for (final String currentHostname : hostnames) {
 				try {
