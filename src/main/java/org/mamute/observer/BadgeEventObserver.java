@@ -14,7 +14,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static org.mamute.model.BadgeType.*;
 
 public class BadgeEventObserver {
 
@@ -28,37 +31,50 @@ public class BadgeEventObserver {
 
     @Inject private MessageFactory messageFactory;
 
-//    @Inject private LoggedUser currentUser;
+    @Inject private LoggedUser currentUser;
+
+    public User currentUser(final BadgeEvent event) {
+        return currentUser.getCurrent();
+    }
+
+    public User questionAuthor(final BadgeEvent event) {
+        final Question question = (Question) event.getContext();
+
+        return question.getAuthor();
+    }
 
     public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
-        final List<Function<BadgeEvent, Optional<Badge>>> evaluators = new ArrayList<>();
+        final List<Evaluator> evaluators = new ArrayList<>();
 
         switch (badgeEvent.getEventType()) {
             case CREATED_QUESTION:
-                evaluators.add(this::considerFirstQuestion);
+                evaluators.add(new Evaluator(FIRST_QUESTION, this::currentUser, this::firstQuestion));
                 break;
             case CREATED_ANSWER:
                 break;
             case QUESTION_UPVOTE:
-                evaluators.add(this::considerFirstQuestionWithScore1);
-                evaluators.add(this::considerQuestionScore10);
+                evaluators.add(new Evaluator(FIRST_QUESTION_SCORE_1, this::questionAuthor, this::firstQuestionWithScore1));
+                evaluators.add(new Evaluator(QUESTION_SCORE_10, this::questionAuthor, this::questionScore10));
                 break;
             case MARKED_SOLUTION:
-                evaluators.add(this::considerAcceptFirstSolution);
+                evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
                 break;
             case LOGIN:
-                evaluators.add(this::consider30ConsecutiveDays);
-                evaluators.add(this::consider100ConsecutiveDays);
+                evaluators.add(new Evaluator(VISIT_30_CONSECUTIVE_DAYS, this::currentUser, this::visit30ConsecutiveDays));
+                evaluators.add(new Evaluator(VISIT_100_CONSECUTIVE_DAYS, this::currentUser, this::visit100ConsecutiveDays));
             default:
                 break;
         }
 
-        for (final Function<BadgeEvent, Optional<Badge>> fn : evaluators) {
-            final Optional<Badge> badge = fn.apply(badgeEvent);
+        // For some reason this doesn't work if it's written using stream expressions
+        // I'm suspecting BCI magic here.
+        for (final Evaluator ev : evaluators) {
+            final User user = ev.extractor.apply(badgeEvent);
 
-            if (badge.isPresent()) {
-                result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", badge.get().getBadgeKey())));
-                badgeDAO.awardBadge(badge.get());
+            if (canAward(ev.badgeType, user) && ev.evaluator.apply(badgeEvent, user)) {
+                final Badge newBadge = new Badge(user, ev.badgeType);
+                result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", newBadge.getBadgeKey())));
+                badgeDAO.awardBadge(newBadge);
             }
         }
     }
@@ -67,65 +83,54 @@ public class BadgeEventObserver {
         return (!user.hasBadge(badgeType) || badgeType.isMultiBadge());
     }
 
-    public Optional<Badge> considerFirstQuestion(final BadgeEvent event) {
-        final User user = event.getUser();
-
-        if (canAward(BadgeType.FIRST_QUESTION, user)) {
-            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION));
-        } else {
-            return Optional.empty();
-        }
+    public boolean firstQuestion(final BadgeEvent event, final User badgeUser) {
+        return true;
     }
 
-    public Optional<Badge> considerFirstQuestionWithScore1(final BadgeEvent event) {
-        final User user = event.getUser();
+    public boolean firstQuestionWithScore1(final BadgeEvent event, final User badgeUser) {
         final Question question = (Question) event.getContext();
 
-        if (canAward(BadgeType.FIRST_QUESTION_SCORE_1, user) && question.getVoteCount() > 0) {
-            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION_SCORE_1));
-        } else {
-            return Optional.empty();
-        }
+        final boolean awardBadge = question.getVoteCount() > 0;
+
+        return awardBadge;
     }
 
-    public Optional<Badge> consider30ConsecutiveDays(final BadgeEvent event) {
-        final User user = event.getUser();
+    public boolean visit30ConsecutiveDays(final BadgeEvent event, final User user) {
+        final boolean award = user.getMetadata().getConsecutiveDays() >= 30;
 
-        if (canAward(BadgeType.VISIT_30_CONSECUTIVE_DAYS, user) && user.getMetadata().getConsecutiveDays() >= 30) {
-            return Optional.of(new Badge(user, BadgeType.VISIT_30_CONSECUTIVE_DAYS));
-        } else {
-            return Optional.empty();
-        }
+        return award;
     }
 
-    public Optional<Badge> consider100ConsecutiveDays(final BadgeEvent event) {
-        final User user = event.getUser();
+    public boolean visit100ConsecutiveDays(final BadgeEvent event, final User user) {
+        final boolean award = user.getMetadata().getConsecutiveDays() >= 100;
 
-        if (canAward(BadgeType.VISIT_100_CONSECUTIVE_DAYS, user) && user.getMetadata().getConsecutiveDays() >= 100) {
-            return Optional.of(new Badge(user, BadgeType.VISIT_100_CONSECUTIVE_DAYS));
-        } else {
-            return Optional.empty();
-        }
+        return award;
     }
 
-    public Optional<Badge> considerAcceptFirstSolution(final BadgeEvent event) {
-        final User user = event.getUser(); //currentUser.getCurrent();
-
-        if (canAward(BadgeType.FIRST_QUESTION_ACCEPTED, user)) {
-            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION_ACCEPTED));
-        } else {
-            return Optional.empty();
-        }
+    public boolean acceptFirstSolution(final BadgeEvent event, final User user) {
+        return true;
     }
 
-    public Optional<Badge> considerQuestionScore10(final BadgeEvent event) {
-        final User user = event.getUser();
+    public boolean questionScore10(final BadgeEvent event, final User user) {
         final Question question = (Question) event.getContext();
 
-        if (canAward(BadgeType.QUESTION_SCORE_10, user) && question.getVoteCount() >= 10) {
-            return Optional.of(new Badge(user, BadgeType.QUESTION_SCORE_10));
-        } else {
-            return Optional.empty();
+        final boolean award = question.getVoteCount() >= 10;
+
+        return award;
+    }
+
+    private static class Evaluator {
+
+        public final BadgeType badgeType;
+
+        public final Function<BadgeEvent, User> extractor;
+
+        public final BiFunction<BadgeEvent, User, Boolean> evaluator;
+
+        public Evaluator(final BadgeType badgeType, final Function<BadgeEvent, User> extractor, final BiFunction<BadgeEvent, User, Boolean> evaluator) {
+            this.badgeType = badgeType;
+            this.extractor = extractor;
+            this.evaluator = evaluator;
         }
     }
 }
