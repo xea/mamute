@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -55,6 +54,8 @@ public class BadgeEventObserver {
             case QUESTION_UPVOTE:
                 evaluators.add(new Evaluator(FIRST_QUESTION_SCORE_1, this::questionAuthor, this::firstQuestionWithScore1));
                 evaluators.add(new Evaluator(QUESTION_SCORE_10, this::questionAuthor, this::questionScore10));
+                evaluators.add(new Evaluator(QUESTION_SCORE_25, this::questionAuthor, this::questionScore25));
+                evaluators.add(new Evaluator(QUESTION_SCORE_100, this::questionAuthor, this::questionScore100));
                 break;
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
@@ -112,9 +113,21 @@ public class BadgeEventObserver {
     }
 
     public boolean questionScore10(final BadgeEvent event, final User user) {
+        return questionScore(event, 10);
+    }
+
+    public boolean questionScore25(final BadgeEvent event, final User user) {
+        return questionScore(event, 25);
+    }
+
+    public boolean questionScore100(final BadgeEvent event, final User user) {
+        return questionScore(event, 100);
+    }
+
+    public boolean questionScore(final BadgeEvent event, final long threshold) {
         final Question question = (Question) event.getContext();
 
-        final boolean award = question.getVoteCount() >= 10;
+        final boolean award = question.getVoteCount() >= threshold;
 
         return award;
     }
