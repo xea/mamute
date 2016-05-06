@@ -1,19 +1,87 @@
 package org.mamute.model;
 
 public enum BadgeType {
-
+    // Ask first question ever
     FIRST_QUESTION(BadgeClass.BRONZE, "badge.first_question"),
-    TENTH_QUESTION(BadgeClass.BRONZE, "badge.tenth_question"),
+    // First question that has a score of 1
+    FIRST_QUESTION_SCORE_1(BadgeClass.BRONZE, "badge.first_question_score_1"),
+    // First question with an accepted answer
+    FIRST_QUESTION_ACCEPTED(BadgeClass.BRONZE, "badge.first_question_accepted"),
+
+    // Ask a question that gets at least 10 score
+    QUESTION_SCORE_10(BadgeClass.BRONZE, "badge.question_score.10_score", true),
+    // Ask a question that gets at least 25 score
+    QUESTION_SCORE_25(BadgeClass.SILVER, "badge.question_score.25_score"),
+    // Ask a question that gets at least 100 score
+    QUESTION_SCORE_100(BadgeClass.GOLD, "badge.question_score.100_score"),
+
+    // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
+    VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),
+    // Log in on 100 consecutive days (days as in not more than 24 hours than last login)
+    VISIT_100_CONSECUTIVE_DAYS(BadgeClass.GOLD, "badge.visit.100_days"),
+
+/*
+    // first question completely ignored for a week (no answer, no comment, no score, no views)
+    FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
+    QUESTION_SERIES(BadgeClass.META, "badge.question_series"),
+    QUESTION_SERIES_5(BadgeClass.BRONZE, "badge.question_series.5_days"),
+    QUESTION_SERIES_30(BadgeClass.SILVER, "badge.question_series.30_days"),
+    QUESTION_SERIES_100(BadgeClass.GOLD, "badge.question_series.100_days"),
+    QUESTION_VIEW_50(BadgeClass.BRONZE, "badge.question_view.50_times"),
+    QUESTION_VIEW_250(BadgeClass.SILVER, "badge.question_view.250_times"),
+    QUESTION_VIEW_500(BadgeClass.GOLD, "badge.question_view.500_times"),
+    QUESTION_FAVOURITE_10(BadgeClass.BRONZE, "badge.question_favourite.10_people"),
+    QUESTION_FAVOURITE_25(BadgeClass.SILVER, "badge.question_favourite.25_people"),
+    QUESTION_FAVOURITE_50(BadgeClass.GOLD, "badge.question_favourite.50_people"),
+
     FIRST_ANSWER(BadgeClass.BRONZE, "badge.first_answer"),
-    TEN_POINT_QUESTION(BadgeClass.BRONZE, "badge.ten_point_question");
+    FIRST_TO_ANSWER_ACCEPTED(BadgeClass.SILVER, "badge.first_accepted_answer"),
+    ANSWER_ACCEPTED_DIFFERENT_TAGS_10(BadgeClass.BRONZE, "badge.answer_accepted.10_tags"),
+    ANSWER_ACCEPTED_DIFFERENT_TAGS_25(BadgeClass.SILVER, "badge.answer_accepted.25_tags"),
+    ANSWER_ACCEPTED_DIFFERENT_TAGS_50(BadgeClass.GOLD, "badge.answer_accepted.50_tags"),
+    ANSWER_SCORE_10(BadgeClass.BRONZE, "badge.answer_score.10_score"),
+    ANSWER_SCORE_25(BadgeClass.SILVER, "badge.answer_score.25_score"),
+    ANSWER_SCORE_100(BadgeClass.GOLD, "badge.answer_score.100_score"),
+    ANSWER_OUTSCORE_ACCEPTED(BadgeClass.SILVER, "badge.answer_outscore.2_factor"),
+    ANSWER_OUTSCORE_ACCEPTED_10(BadgeClass.GOLD, "badge.answer_outscore.5_factor"),
+    ANSWER_REVIVE_QUESTION_30(BadgeClass.BRONZE, "badge.answer_revive_question.30_day"),
+    ANSWER_REVIVE_QUESTION_60(BadgeClass.SILVER, "badge.answer_revive_question.60_day"),
+    ANSWER_OWN_QUESTION_SCORE_2(BadgeClass.BRONZE, "badge.answer_own_question.2_score"),
+    ANSWER_ACCEPTED_NO_SCORE_5(BadgeClass.SILVER, "badge.answer_accepted_no_score.5_times"),
+    ANSWER_ACCEPTED_NO_SCORE_10(BadgeClass.GOLD, "badge.answer_accepted_no_score.10_times"),
+
+    FIRST_BOUNTY_OFFER_SELF(BadgeClass.BRONZE, "badge.bounty_offer.self"),
+    FIRST_BOUNTY_OFFER_OTHER(BadgeClass.BRONZE, "badge.bounty_offer.other"),
+
+    AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
+    COMMENT_10(BadgeClass.BRONZE, "badge.comment_10"),
+    COMMENT_50(BadgeClass.SILVER, "badge.comment_50"),
+    COMMENT_10_SCORE_5(BadgeClass.SILVER, "badge.comment_10.score_5"),
+    COMMENT_50_SCORE_5(BadgeClass.GOLD, "badge.comment_50.score_5"),
+
+
+    EARN_200_DAILY_REPUTATION_1_DAY(BadgeClass.BRONZE, "badge.earn_200_rep.1_day"),
+    EARN_200_DAILY_REPUTATION_50_DAYS(BadgeClass.SILVER, "badge.earn_200_rep.50_days"),
+    EARN_200_DAILY_REPUTATION_150_DAYS(BadgeClass.GOLD, "badge.earn_200_rep.150_days"),
+    */
+    ;
+
+
 
     private String id;
 
     private BadgeClass badgeClass;
 
+    private boolean multiBadge;
+
     BadgeType(final BadgeClass badgeClass, final String id) {
+        this(badgeClass, id, false);
+    }
+
+    BadgeType(final BadgeClass badgeClass, final String id, final boolean multiBadge) {
         this.id = id;
         this.badgeClass = badgeClass;
+        this.multiBadge = multiBadge;
     }
 
     public String getId() {
@@ -26,5 +94,9 @@ public enum BadgeType {
 
     public BadgeClass getBadgeClass() {
         return badgeClass;
+    }
+
+    public boolean isMultiBadge() {
+        return multiBadge;
     }
 }

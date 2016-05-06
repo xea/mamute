@@ -3,6 +3,7 @@ package org.mamute.observer;
 import br.com.caelum.vraptor.Result;
 import org.mamute.dao.BadgeDAO;
 import org.mamute.dao.ReputationEventDAO;
+import org.mamute.dao.UserDAO;
 import org.mamute.event.BadgeEvent;
 import org.mamute.factory.MessageFactory;
 import org.mamute.model.*;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class BadgeEventObserver {
@@ -22,113 +24,108 @@ public class BadgeEventObserver {
 
     @Inject private ReputationEventDAO reputationDAO;
 
+    @Inject private UserDAO userDAO;
+
     @Inject private MessageFactory messageFactory;
 
-    public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
-        final List<Function<BadgeEvent, Badge>> evaluators = new ArrayList<>();
+//    @Inject private LoggedUser currentUser;
 
+    public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
+        final List<Function<BadgeEvent, Optional<Badge>>> evaluators = new ArrayList<>();
 
         switch (badgeEvent.getEventType()) {
             case CREATED_QUESTION:
-                evaluators.add(this::considerFirstQuestionBadge);
-                evaluators.add(this::considerTenthQuestionBadge);
+                evaluators.add(this::considerFirstQuestion);
                 break;
             case CREATED_ANSWER:
-                evaluators.add(this::considerFirstAnswerBadge);
-                evaluators.add(this::considerQuestionWithTenAnswers);
                 break;
             case QUESTION_UPVOTE:
-                evaluators.add(this::considerTenPointQuestion);
+                evaluators.add(this::considerFirstQuestionWithScore1);
+                evaluators.add(this::considerQuestionScore10);
                 break;
+            case MARKED_SOLUTION:
+                evaluators.add(this::considerAcceptFirstSolution);
+                break;
+            case LOGIN:
+                evaluators.add(this::consider30ConsecutiveDays);
+                evaluators.add(this::consider100ConsecutiveDays);
             default:
                 break;
         }
 
-        for (final Function<BadgeEvent, Badge> fn : evaluators) {
-            final Badge badge = fn.apply(badgeEvent);
+        for (final Function<BadgeEvent, Optional<Badge>> fn : evaluators) {
+            final Optional<Badge> badge = fn.apply(badgeEvent);
 
-            if (badge != null) {
-                result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", badge.getBadgeKey())));
-                badgeDAO.awardBadge(badge);
+            if (badge.isPresent()) {
+                result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", badge.get().getBadgeKey())));
+                badgeDAO.awardBadge(badge.get());
             }
         }
     }
 
-    public Badge considerFirstQuestionBadge(final BadgeEvent event) {
-        final Badge badge;
+    protected boolean canAward(final BadgeType badgeType, final User user) {
+        return (!user.hasBadge(badgeType) || badgeType.isMultiBadge());
+    }
 
-        if (badgeDAO.userBadgeCount(event.getUser(), BadgeType.FIRST_QUESTION) == 0) {
-            badge = new Badge(event.getUser(), BadgeType.FIRST_QUESTION);
+    public Optional<Badge> considerFirstQuestion(final BadgeEvent event) {
+        final User user = event.getUser();
+
+        if (canAward(BadgeType.FIRST_QUESTION, user)) {
+            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION));
         } else {
-            badge = null;
+            return Optional.empty();
         }
-
-        return badge;
     }
 
-    public Badge considerTenthQuestionBadge(final BadgeEvent event) {
-        final Badge badge;
+    public Optional<Badge> considerFirstQuestionWithScore1(final BadgeEvent event) {
+        final User user = event.getUser();
+        final Question question = (Question) event.getContext();
 
-        List<ReputationEvent> events = reputationDAO.karmaEvents(event.getUser());
-
-        final long count = events.stream()
-                .filter(e -> EventType.CREATED_QUESTION.toString().equals(e.getType().name()))
-                .count();
-
-        if (count >= 9 && badgeDAO.userBadgeCount(event.getUser(), BadgeType.TENTH_QUESTION) == 0) {
-           badge = new Badge(event.getUser(), BadgeType.TENTH_QUESTION);
+        if (canAward(BadgeType.FIRST_QUESTION_SCORE_1, user) && question.getVoteCount() > 0) {
+            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION_SCORE_1));
         } else {
-            badge = null;
+            return Optional.empty();
         }
-
-        return badge;
     }
 
-    public Badge considerFirstAnswerBadge(final BadgeEvent event) {
-        final Badge badge;
+    public Optional<Badge> consider30ConsecutiveDays(final BadgeEvent event) {
+        final User user = event.getUser();
 
-        if (badgeDAO.userBadgeCount(event.getUser(), BadgeType.FIRST_ANSWER) == 0) {
-            badge = new Badge(event.getUser(), BadgeType.FIRST_ANSWER);
+        if (canAward(BadgeType.VISIT_30_CONSECUTIVE_DAYS, user) && user.getMetadata().getConsecutiveDays() >= 30) {
+            return Optional.of(new Badge(user, BadgeType.VISIT_30_CONSECUTIVE_DAYS));
         } else {
-            badge = null;
+            return Optional.empty();
         }
-
-        return badge;
     }
 
-    public Badge considerQuestionWithTenAnswers(final BadgeEvent event) {
-        Badge badge = null;
+    public Optional<Badge> consider100ConsecutiveDays(final BadgeEvent event) {
+        final User user = event.getUser();
 
-        if (event.getContext() != null) {
-            final ReputationEventContext context = event.getContext();
-
-            if (context instanceof Question) {
-                final Question question = (Question) context;
-
-                final long count = question.getAnswers().stream().filter(a -> !a.isTheSameAuthorOfQuestion()).count();
-
-                if (count >= 10) {
-                    badge = new Badge(event.getUser(), BadgeType.TENTH_QUESTION);
-                }
-            }
+        if (canAward(BadgeType.VISIT_100_CONSECUTIVE_DAYS, user) && user.getMetadata().getConsecutiveDays() >= 100) {
+            return Optional.of(new Badge(user, BadgeType.VISIT_100_CONSECUTIVE_DAYS));
+        } else {
+            return Optional.empty();
         }
-
-        return badge;
     }
 
-    public Badge considerTenPointQuestion(final BadgeEvent event) {
-        Badge badge = null;
+    public Optional<Badge> considerAcceptFirstSolution(final BadgeEvent event) {
+        final User user = event.getUser(); //currentUser.getCurrent();
 
-        if (event.getContext() != null) {
-            if (event.getContext() instanceof Question) {
-                final Question question = (Question) event.getContext();
-
-                if (question.getVoteCount() >= 10) {
-                    badge = new Badge(event.getUser(), BadgeType.TEN_POINT_QUESTION);
-                }
-            }
+        if (canAward(BadgeType.FIRST_QUESTION_ACCEPTED, user)) {
+            return Optional.of(new Badge(user, BadgeType.FIRST_QUESTION_ACCEPTED));
+        } else {
+            return Optional.empty();
         }
+    }
 
-        return badge;
+    public Optional<Badge> considerQuestionScore10(final BadgeEvent event) {
+        final User user = event.getUser();
+        final Question question = (Question) event.getContext();
+
+        if (canAward(BadgeType.QUESTION_SCORE_10, user) && question.getVoteCount() >= 10) {
+            return Optional.of(new Badge(user, BadgeType.QUESTION_SCORE_10));
+        } else {
+            return Optional.empty();
+        }
     }
 }

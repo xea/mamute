@@ -21,12 +21,7 @@ public class BadgesController {
     public void showBadges() {
         final List<BadgeDescription> badges = new ArrayList<>();
 
-        final List<BadgeType> badgeTypes = Arrays.asList(
-                BadgeType.FIRST_QUESTION,
-                BadgeType.TENTH_QUESTION,
-                BadgeType.FIRST_ANSWER,
-                BadgeType.TEN_POINT_QUESTION
-        );
+        final List<BadgeType> badgeTypes = Arrays.asList(BadgeType.values());
 
         badgeTypes.stream().forEach(type -> badges.add(new BadgeDescription( type.getId(), type.getDescriptionId(), type.getBadgeClass().toString().toLowerCase())));
 

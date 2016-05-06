@@ -103,7 +103,7 @@ public class MamuteDatabaseConfiguration {
 		cfg.addAnnotatedClass(Attachment.class);
 		cfg.addAnnotatedClass(BlockedIp.class);
 		cfg.addAnnotatedClass(Badge.class);
-		cfg.addAnnotatedClass(UserConfig.class);
+		cfg.addAnnotatedClass(UserMetadata.class);
 	}
 
 	public Map<Object, Object> getProperties() {

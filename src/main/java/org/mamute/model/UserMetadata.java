@@ -1,24 +1,27 @@
 package org.mamute.model;
 
+import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.CascadeType;
 import org.joda.time.DateTime;
 import org.mamute.providers.SessionFactoryCreator;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Cacheable
 @Cache(usage= CacheConcurrencyStrategy.READ_WRITE, region="cache")
-@Table(name="UserConfig")
-public class UserConfig {
+@Table(name="UserMetadata")
+public class UserMetadata {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @ManyToOne
+    @Cascade(CascadeType.ALL)
     private User user;
 
     private String variable;
@@ -30,14 +33,14 @@ public class UserConfig {
     @Type(type = SessionFactoryCreator.JODA_TIME_TYPE)
     private final DateTime createdAt = new DateTime();
 
-    public UserConfig() {
+    public UserMetadata() {
     }
 
-    public UserConfig(final String variable, final String value) {
+    public UserMetadata(final String variable, final String value) {
         this(variable, value, null);
     }
 
-    public UserConfig(final String variable, final String value, final String comment) {
+    public UserMetadata(final String variable, final String value, final String comment) {
         this.variable = variable;
         this.value = value;
         this.comment = comment;
@@ -78,4 +81,5 @@ public class UserConfig {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
 }

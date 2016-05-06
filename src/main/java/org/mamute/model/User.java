@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.inject.Vetoed;
@@ -30,6 +31,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CascadeType;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -42,6 +44,7 @@ import org.mamute.infra.Digester;
 import org.mamute.model.interfaces.Identifiable;
 import org.mamute.model.interfaces.Moderatable;
 import org.mamute.model.interfaces.Votable;
+import org.mamute.model.metadata.Metadata;
 import org.mamute.model.watch.Watcher;
 import org.mamute.providers.SessionFactoryCreator;
 
@@ -102,7 +105,8 @@ public class User implements Identifiable {
 	private final List<Badge> badges = new ArrayList<>();
 
 	@OneToMany(mappedBy="user")
-	private final List<UserConfig> userConfigs = new ArrayList<>();
+	@Cascade(CascadeType.SAVE_UPDATE)
+	private final List<UserMetadata> userMetadata = new ArrayList<>();
 
 	public static final User GHOST;
 
@@ -453,6 +457,10 @@ public class User implements Identifiable {
 		return badges.stream().filter(b -> BadgeType.valueOf(b.getBadgeKey()).getBadgeClass().equals(badgeClass)).collect(Collectors.toList());
 	}
 
+	public List<Badge> getBadges(final BadgeType badgeType) {
+		return badges.stream().filter(b -> BadgeType.valueOf(b.getBadgeKey()).equals(badgeType)).collect(Collectors.toList());
+	}
+
 	public List<Badge> getGoldBadges() {
 		return getBadgesByClass(BadgeClass.GOLD);
 	}
@@ -465,7 +473,37 @@ public class User implements Identifiable {
 		return getBadgesByClass(BadgeClass.BRONZE);
 	}
 
-	public List<UserConfig> getUserConfigs() {
-		return userConfigs;
+	public long getBadgeCount(final BadgeType badgeType) {
+		return badges.stream().filter(b -> BadgeType.valueOf(b.getBadgeKey()).equals(badgeType)).count();
+	}
+
+	public boolean hasBadge(final BadgeType badgeType) {
+		return getBadgeCount(badgeType) > 0;
+	}
+
+	public Optional<UserMetadata> getRawMetadata(final MetadataType type) {
+		return userMetadata.stream().filter(cfg -> type.getId().equals(cfg.getVariable())).findFirst();
+	}
+
+	public void setRawMetadata(final MetadataType type, final String value) {
+		final Optional<UserMetadata> oldValue = getRawMetadata(type);
+
+		final UserMetadata newValue;
+
+		if (oldValue.isPresent()) {
+			newValue = oldValue.get();
+			userMetadata.remove(newValue);
+		} else {
+			newValue = new UserMetadata(type.getId(), value);
+			newValue.setUser(this);
+		}
+
+		newValue.setValue(value);
+
+		userMetadata.add(newValue);
+	}
+
+	public Metadata getMetadata() {
+		return new Metadata(userMetadata, this);
 	}
 }

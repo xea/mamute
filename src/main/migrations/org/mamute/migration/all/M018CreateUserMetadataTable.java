@@ -11,11 +11,11 @@ import java.util.List;
  *
  */
 @ApplicationScoped
-public class M018CreateUserConfigTable implements SchemaMigration {
+public class M018CreateUserMetadataTable implements SchemaMigration {
 
     @Override
     public List<MigrationOperation> up() {
-        String q1 = " create table UserConfig (\n" +
+        String q1 = " create table UserMetadata (\n" +
                 "        id bigint not null auto_increment,\n" +
                 "        user_id bigint not null,\n" +
                 "        variable varchar(255),\n" +
