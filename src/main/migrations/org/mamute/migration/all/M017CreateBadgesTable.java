@@ -17,6 +17,7 @@ public class M017CreateBadgesTable implements SchemaMigration {
         String q1 = " create table Badges (\n" +
                 "        id bigint not null auto_increment,\n" +
                 "        user_id bigint not null,\n" +
+                "        contextId bigint not null,\n" +
                 "        badgeKey varchar(255),\n" +
                 "        createdAt datetime,\n" +
                 "        comment varchar(255),\n" +

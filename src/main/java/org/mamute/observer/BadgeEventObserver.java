@@ -50,6 +50,7 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(FIRST_QUESTION, this::currentUser, this::firstQuestion));
                 break;
             case CREATED_ANSWER:
+                evaluators.add(new Evaluator(FIRST_ANSWER, this::currentUser, this::firstAnswer));
                 break;
             case QUESTION_UPVOTE:
                 evaluators.add(new Evaluator(FIRST_QUESTION_SCORE_1, this::questionAuthor, this::firstQuestionWithScore1));
@@ -63,6 +64,12 @@ public class BadgeEventObserver {
             case LOGIN:
                 evaluators.add(new Evaluator(VISIT_30_CONSECUTIVE_DAYS, this::currentUser, this::visit30ConsecutiveDays));
                 evaluators.add(new Evaluator(VISIT_100_CONSECUTIVE_DAYS, this::currentUser, this::visit100ConsecutiveDays));
+                break;
+            case QUESTION_VIEW:
+                evaluators.add(new Evaluator(QUESTION_VIEW_50, this::questionAuthor, this::questionView50));
+                evaluators.add(new Evaluator(QUESTION_VIEW_250, this::questionAuthor, this::questionView250));
+                evaluators.add(new Evaluator(QUESTION_VIEW_500, this::questionAuthor, this::questionView500));
+                break;
             default:
                 break;
         }
@@ -72,16 +79,16 @@ public class BadgeEventObserver {
         for (final Evaluator ev : evaluators) {
             final User user = ev.extractor.apply(badgeEvent);
 
-            if (canAward(ev.badgeType, user) && ev.evaluator.apply(badgeEvent, user)) {
-                final Badge newBadge = new Badge(user, ev.badgeType);
+            if (canAward(ev.badgeType, user, badgeEvent) && ev.evaluator.apply(badgeEvent, user)) {
+                final Badge newBadge = new Badge(user, ev.badgeType, badgeEvent.getContext());
                 result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", newBadge.getBadgeKey())));
                 badgeDAO.awardBadge(newBadge);
             }
         }
     }
 
-    protected boolean canAward(final BadgeType badgeType, final User user) {
-        return (!user.hasBadge(badgeType) || badgeType.isMultiBadge());
+    protected boolean canAward(final BadgeType badgeType, final User user, final BadgeEvent event) {
+        return (!user.hasBadge(badgeType, event.getContext().getId()) || badgeType.isMultiBadge());
     }
 
     public boolean firstQuestion(final BadgeEvent event, final User badgeUser) {
@@ -94,6 +101,10 @@ public class BadgeEventObserver {
         final boolean awardBadge = question.getVoteCount() > 0;
 
         return awardBadge;
+    }
+
+    public boolean firstAnswer(final BadgeEvent event, final User user) {
+        return true;
     }
 
     public boolean visit30ConsecutiveDays(final BadgeEvent event, final User user) {
@@ -128,6 +139,26 @@ public class BadgeEventObserver {
         final Question question = (Question) event.getContext();
 
         final boolean award = question.getVoteCount() >= threshold;
+
+        return award;
+    }
+
+    public boolean questionView50(final BadgeEvent event, final User user) {
+        return questionView(event, 50);
+    }
+
+    public boolean questionView250(final BadgeEvent event, final User user) {
+        return questionView(event, 250);
+    }
+
+    public boolean questionView500(final BadgeEvent event, final User user) {
+        return questionView(event, 500);
+    }
+
+    public boolean questionView(final BadgeEvent event, final long threshold) {
+        final Question question = (Question) event.getContext();
+
+        final boolean award = question.getViews() > threshold;
 
         return award;
     }

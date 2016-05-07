@@ -26,6 +26,8 @@ public class Badge {
 
     private String comment;
 
+    private Long contextId;
+
     @Type(type = SessionFactoryCreator.JODA_TIME_TYPE)
     private final DateTime createdAt = new DateTime();
 
@@ -35,11 +37,31 @@ public class Badge {
     public Badge(final User user, final String badgeKey) {
         this.user = user;
         this.badgeKey = badgeKey;
+        this.contextId = 0L;
     }
 
     public Badge(final User user, final BadgeType badgeType) {
         this.user = user;
         this.badgeKey = badgeType.toString();
+        this.contextId = 0L;
+    }
+
+    public Badge(final User user, final BadgeType badgeType, final ReputationEventContext context) {
+        this.user = user;
+        this.badgeKey = badgeType.toString();
+
+        if (context == null) {
+            this.contextId = 0L;
+        } else {
+            this.contextId = context.getId();
+        }
+
+    }
+
+    public Badge(final User user, final BadgeType badgeType, final long contextId) {
+        this.user = user;
+        this.badgeKey = badgeType.toString();
+        this.contextId = contextId;
     }
 
     public Long getId() {
@@ -76,5 +98,13 @@ public class Badge {
 
     public DateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Long getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(Long contextId) {
+        this.contextId = contextId;
     }
 }

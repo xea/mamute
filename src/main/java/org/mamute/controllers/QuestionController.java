@@ -154,6 +154,7 @@ public class QuestionController {
 			result.include("userMediumPhoto", true);
 			linker.linkTo(this).showQuestion(question, sluggedTitle);
 			result.include("facebookUrl", facebook.getOauthUrl(linker.get()));
+			triggerViewEvent(current, question);
 		} else {
 			result.notFound();
 		}
@@ -242,6 +243,10 @@ public class QuestionController {
 
 		result.include("mamuteMessages", asList(messageFactory.build("confirmation", "question.delete.confirmation")));
 		result.redirectTo(ListController.class).home(null);
+	}
+
+	private void triggerViewEvent(final User user, final Question question) {
+		badgeEvent.fire(new BadgeEvent(EventType.QUESTION_VIEW, user, question));
 	}
 
 	private boolean validate(List<Tag> foundTags, List<String> splitedTags) {

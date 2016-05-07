@@ -11,9 +11,18 @@ public enum BadgeType {
     // Ask a question that gets at least 10 score
     QUESTION_SCORE_10(BadgeClass.BRONZE, "badge.question_score.10_score", true),
     // Ask a question that gets at least 25 score
-    QUESTION_SCORE_25(BadgeClass.SILVER, "badge.question_score.25_score"),
+    QUESTION_SCORE_25(BadgeClass.SILVER, "badge.question_score.25_score", true),
     // Ask a question that gets at least 100 score
-    QUESTION_SCORE_100(BadgeClass.GOLD, "badge.question_score.100_score"),
+    QUESTION_SCORE_100(BadgeClass.GOLD, "badge.question_score.100_score", true),
+    // Ask a question that is viewed at least 50 times
+    QUESTION_VIEW_50(BadgeClass.BRONZE, "badge.question_view.50_times", true),
+    // Ask a question that is viewed at least 250 times
+    QUESTION_VIEW_250(BadgeClass.SILVER, "badge.question_view.250_times", true),
+    // Ask a question that is viewed at least 500 times
+    QUESTION_VIEW_500(BadgeClass.GOLD, "badge.question_view.500_times", true),
+
+    // Post your first answer
+    FIRST_ANSWER(BadgeClass.BRONZE, "badge.first_answer"),
 
     // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
     VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),
@@ -27,14 +36,10 @@ public enum BadgeType {
     QUESTION_SERIES_5(BadgeClass.BRONZE, "badge.question_series.5_days"),
     QUESTION_SERIES_30(BadgeClass.SILVER, "badge.question_series.30_days"),
     QUESTION_SERIES_100(BadgeClass.GOLD, "badge.question_series.100_days"),
-    QUESTION_VIEW_50(BadgeClass.BRONZE, "badge.question_view.50_times"),
-    QUESTION_VIEW_250(BadgeClass.SILVER, "badge.question_view.250_times"),
-    QUESTION_VIEW_500(BadgeClass.GOLD, "badge.question_view.500_times"),
     QUESTION_FAVOURITE_10(BadgeClass.BRONZE, "badge.question_favourite.10_people"),
     QUESTION_FAVOURITE_25(BadgeClass.SILVER, "badge.question_favourite.25_people"),
     QUESTION_FAVOURITE_50(BadgeClass.GOLD, "badge.question_favourite.50_people"),
 
-    FIRST_ANSWER(BadgeClass.BRONZE, "badge.first_answer"),
     FIRST_TO_ANSWER_ACCEPTED(BadgeClass.SILVER, "badge.first_accepted_answer"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_10(BadgeClass.BRONZE, "badge.answer_accepted.10_tags"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_25(BadgeClass.SILVER, "badge.answer_accepted.25_tags"),
