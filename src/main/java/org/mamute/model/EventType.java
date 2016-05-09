@@ -64,7 +64,13 @@ public enum EventType implements KarmaRewardEvent {
 		public Integer reward() {
 			return KarmaCalculator.ANSWERED_QUESTION;
 		}
-	}, 
+	},
+	CREATED_COMMENT {
+		@Override
+		public Integer reward() {
+			return 0;
+		}
+	},
 	DOWNVOTED_SOMETHING {
 		@Override
 		public Integer reward() {

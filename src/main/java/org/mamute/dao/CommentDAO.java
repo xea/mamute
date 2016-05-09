@@ -54,4 +54,10 @@ public class CommentDAO {
 			delete(comment);
 		}
 	}
+
+	public List<Comment> userComments(final User user) {
+		List<Comment> comments = session.createQuery("from Comment c where c.author = :user").setParameter("user", user).list();
+
+		return comments;
+	}
 }

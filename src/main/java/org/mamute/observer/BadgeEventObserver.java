@@ -3,6 +3,7 @@ package org.mamute.observer;
 import br.com.caelum.vraptor.Result;
 import org.joda.time.DateTime;
 import org.mamute.dao.BadgeDAO;
+import org.mamute.dao.CommentDAO;
 import org.mamute.dao.ReputationEventDAO;
 import org.mamute.dao.UserDAO;
 import org.mamute.event.BadgeEvent;
@@ -30,6 +31,8 @@ public class BadgeEventObserver {
     @Inject private ReputationEventDAO reputationDAO;
 
     @Inject private UserDAO userDAO;
+
+    @Inject private CommentDAO commentDAO;
 
     @Inject private MessageFactory messageFactory;
 
@@ -94,6 +97,12 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_VIEW_50, this::questionAuthor, this::questionView50));
                 evaluators.add(new Evaluator(QUESTION_VIEW_250, this::questionAuthor, this::questionView250));
                 evaluators.add(new Evaluator(QUESTION_VIEW_500, this::questionAuthor, this::questionView500));
+                break;
+            case CREATED_COMMENT:
+                evaluators.add(new Evaluator(COMMENT_10, this::currentUser, this::comment10));
+                evaluators.add(new Evaluator(COMMENT_50, this::currentUser, this::comment50));
+                evaluators.add(new Evaluator(COMMENT_10_SCORE_5, this::currentUser, this::comment10Score5));
+                evaluators.add(new Evaluator(COMMENT_50_SCORE_5, this::currentUser, this::comment50Score5));
                 break;
             default:
                 break;
@@ -291,6 +300,35 @@ public class BadgeEventObserver {
             }
         }
 
+        return false;
+    }
+
+    public boolean comment10(final BadgeEvent event, final User user) {
+        return leaveComment(user, 10, 0);
+    }
+
+    public boolean comment50(final BadgeEvent event, final User user) {
+        return leaveComment(user, 50, 0);
+    }
+
+    public boolean comment10Score5(final BadgeEvent event, final User user) {
+        return leaveComment(user, 10, 5);
+    }
+
+    public boolean comment50Score5(final BadgeEvent event, final User user) {
+        return leaveComment(user, 50, 5);
+    }
+
+    public boolean leaveComment(final User user, final long count, final long scoreLimit) {
+        final List<Comment> comments = commentDAO.userComments(user);
+
+        if (comments.size() > count) {
+            if (scoreLimit > 0) {
+                return (comments.stream().filter(c -> c.getVoteCount() >= scoreLimit).count() > count);
+            } else {
+                return true;
+            }
+        }
         return false;
     }
 

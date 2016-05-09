@@ -1,5 +1,6 @@
 package org.mamute.controllers;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import br.com.caelum.vraptor.Delete;
@@ -11,6 +12,7 @@ import org.mamute.brutauth.auth.rules.InactiveQuestionRequiresMoreKarmaRule;
 import org.mamute.brutauth.auth.rules.InputRule;
 import org.mamute.dao.CommentDAO;
 import org.mamute.dao.WatcherDAO;
+import org.mamute.event.BadgeEvent;
 import org.mamute.infra.ModelUrlMapping;
 import org.mamute.infra.NotFoundException;
 import org.mamute.mail.action.EmailAction;
@@ -42,6 +44,7 @@ public class CommentController {
 	@Inject private NotificationManager notificationManager;
 	@Inject private WatcherDAO watchers;
 	@Inject private Environment environment;
+	@Inject private Event<BadgeEvent> badgeEvent;
 
 	@SimpleBrutauthRules({EnvironmentKarmaRule.class})
 	@EnvironmentAccessLevel(PermissionRules.CREATE_COMMENT)
@@ -65,6 +68,8 @@ public class CommentController {
 		} else {
 			watchers.removeIfWatching(watchable, new Watcher(current));
 		}
+
+		badgeEvent.fire(new BadgeEvent(EventType.CREATED_COMMENT, current));
 
 		result.include("post", commentable);
 		result.include("type", onWhat);

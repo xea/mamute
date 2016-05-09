@@ -55,6 +55,15 @@ public enum BadgeType {
     // Log in on 100 consecutive days (days as in not more than 24 hours than last login)
     VISIT_100_CONSECUTIVE_DAYS(BadgeClass.GOLD, "badge.visit.100_days"),
 
+    // Leave 10 comments
+    COMMENT_10(BadgeClass.BRONZE, "badge.comment_10"),
+    // Leave 50 comments
+    COMMENT_50(BadgeClass.SILVER, "badge.comment_50"),
+    // Leave 10 comments with a score of at least 5
+    COMMENT_10_SCORE_5(BadgeClass.SILVER, "badge.comment_10.score_5"),
+    // Leave 50 comments with a score of at least 5
+    COMMENT_50_SCORE_5(BadgeClass.GOLD, "badge.comment_50.score_5"),
+
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
@@ -74,10 +83,6 @@ public enum BadgeType {
     FIRST_BOUNTY_OFFER_OTHER(BadgeClass.BRONZE, "badge.bounty_offer.other"),
 
     AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
-    COMMENT_10(BadgeClass.BRONZE, "badge.comment_10"),
-    COMMENT_50(BadgeClass.SILVER, "badge.comment_50"),
-    COMMENT_10_SCORE_5(BadgeClass.SILVER, "badge.comment_10.score_5"),
-    COMMENT_50_SCORE_5(BadgeClass.GOLD, "badge.comment_50.score_5"),
 
 
     EARN_200_DAILY_REPUTATION_1_DAY(BadgeClass.BRONZE, "badge.earn_200_rep.1_day"),
