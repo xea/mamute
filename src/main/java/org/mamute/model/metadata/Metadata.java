@@ -1,6 +1,7 @@
 package org.mamute.model.metadata;
 
 import org.mamute.model.MetadataType;
+import org.mamute.model.Question;
 import org.mamute.model.User;
 import org.mamute.model.UserMetadata;
 
@@ -8,8 +9,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -69,6 +73,45 @@ public class Metadata {
             return loginCount;
         } else {
             return 1;
+        }
+    }
+
+    public void updateCurrentQuestionSeries(final Question question) {
+        final Optional<UserMetadata> searchResult = findMetadata(MetadataType.QUESTION_SERIES);
+
+        if (searchResult.isPresent()) {
+            final UserMetadata metadata = searchResult.get();
+            final List<String> parts = Arrays.asList(metadata.getValue().split(":"));
+
+            final List<Long> questionIds = parts.stream().map(Long::valueOf).collect(Collectors.toList());
+
+            final String ids = questionIds.stream().map(id -> id.toString()).reduce("", (acc, x) -> acc + x + ": ");
+            final String idString = ids + question.getId();
+
+            metadata.setValue(idString);
+        } else {
+            final String value = question.getId().toString();
+
+            user.setRawMetadata(MetadataType.QUESTION_SERIES, value);
+        }
+    }
+
+    public void resetQuestionSeries() {
+        user.setRawMetadata(MetadataType.QUESTION_SERIES, "");
+    }
+
+    public List<Long> getQuestionSeries() {
+        final Optional<UserMetadata> searchResult = findMetadata(MetadataType.QUESTION_SERIES);
+
+        if (searchResult.isPresent()) {
+            final UserMetadata metadata = searchResult.get();
+            final List<String> parts = Arrays.asList(metadata.getValue().split(":"));
+
+            final List<Long> questionIds = parts.stream().map(Long::valueOf).collect(Collectors.toList());
+
+            return questionIds;
+        } else {
+            return new ArrayList<>();
         }
     }
 

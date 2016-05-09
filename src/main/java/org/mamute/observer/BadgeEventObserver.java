@@ -64,9 +64,18 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_SCORE_10, this::questionAuthor, this::questionScore10));
                 evaluators.add(new Evaluator(QUESTION_SCORE_25, this::questionAuthor, this::questionScore25));
                 evaluators.add(new Evaluator(QUESTION_SCORE_100, this::questionAuthor, this::questionScore100));
+                /* not implemented yet
+                evaluators.add(new Evaluator(QUESTION_SERIES_5, this::questionAuthor, this::questionSeries5));
+                evaluators.add(new Evaluator(QUESTION_SERIES_30, this::questionAuthor, this::questionSeries30));
+                evaluators.add(new Evaluator(QUESTION_SERIES_100, this::questionAuthor, this::questionSeries100));
+                */
                 break;
             case ANSWER_UPVOTE:
                 evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
+                evaluators.add(new Evaluator(ANSWER_SCORE_10, this::answerAuthor, this::answerScore10));
+                evaluators.add(new Evaluator(ANSWER_SCORE_25, this::answerAuthor, this::answerScore25));
+                evaluators.add(new Evaluator(ANSWER_SCORE_100, this::answerAuthor, this::answerScore100));
+                break;
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
                 evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
@@ -123,13 +132,15 @@ public class BadgeEventObserver {
     }
 
     public boolean visit30ConsecutiveDays(final BadgeEvent event, final User user) {
-        final boolean award = user.getMetadata().getConsecutiveDays() >= 30;
-
-        return award;
+        return visitConsecutiveDays(user, 30);
     }
 
     public boolean visit100ConsecutiveDays(final BadgeEvent event, final User user) {
-        final boolean award = user.getMetadata().getConsecutiveDays() >= 100;
+        return visitConsecutiveDays(user, 100);
+    }
+
+    public boolean visitConsecutiveDays(final User user, final long threshold) {
+        final boolean award = user.getMetadata().getConsecutiveDays() >= threshold;
 
         return award;
     }
@@ -186,6 +197,48 @@ public class BadgeEventObserver {
         final Question question = (Question) event.getContext();
 
         final boolean award = question.getViews() > threshold;
+
+        return award;
+    }
+
+    public boolean questionSeries5(final BadgeEvent event, final User user) {
+        return questionSeries(user, 5);
+    }
+
+    public boolean questionSeries30(final BadgeEvent event, final User user) {
+        return questionSeries(user, 30);
+    }
+
+    public boolean questionSeries100(final BadgeEvent event, final User user) {
+        return questionSeries(user, 100);
+    }
+
+    // TODO needs implementing
+    public boolean questionSeries(final User user, final long threshold) {
+        if (user.getMetadata().getQuestionSeries().size() > threshold) {
+            user.getMetadata().resetQuestionSeries();
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean answerScore10(final BadgeEvent event, final User user) {
+        return answerScore(event, 10);
+    }
+
+    public boolean answerScore25(final BadgeEvent event, final User user) {
+        return answerScore(event, 25);
+    }
+
+    public boolean answerScore100(final BadgeEvent event, final User user) {
+        return answerScore(event, 100);
+    }
+
+    public boolean answerScore(final BadgeEvent event, final long threshold) {
+        final Answer answer = (Answer) event.getContext();
+        final boolean award = answer.getVoteCount() > threshold;
 
         return award;
     }

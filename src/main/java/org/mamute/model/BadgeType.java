@@ -20,11 +20,27 @@ public enum BadgeType {
     QUESTION_VIEW_250(BadgeClass.SILVER, "badge.question_view.250_times", true),
     // Ask a question that is viewed at least 500 times
     QUESTION_VIEW_500(BadgeClass.GOLD, "badge.question_view.500_times", true),
+    /* Not imlemented yet
+
+    // Ask a question with a positive score on 5 different days
+    QUESTION_SERIES_5(BadgeClass.BRONZE, "badge.question_series.5_days", true),
+    // Ask a question with a positive score on 30 different days
+    QUESTION_SERIES_30(BadgeClass.SILVER, "badge.question_series.30_days", true),
+    // Ask a question with a positive score on 100 different days
+    QUESTION_SERIES_100(BadgeClass.GOLD, "badge.question_series.100_days", true),
+
+     */
 
     // Post your first answer
     FIRST_ANSWER(BadgeClass.BRONZE, "badge.first_answer"),
     // First answer to the a question that is accepted with a score of 10 or more
     FIRST_ANSWER_ACCEPTED_SCORE_10(BadgeClass.SILVER, "badge.first_to_answer_accepted_score_10", true),
+    // Post an answer that receives a score of 10
+    ANSWER_SCORE_10(BadgeClass.BRONZE, "badge.answer_score.10_score"),
+    // Post an answer that receives a score of 25
+    ANSWER_SCORE_25(BadgeClass.SILVER, "badge.answer_score.25_score"),
+    // Post an answer that receives a score of 100
+    ANSWER_SCORE_100(BadgeClass.GOLD, "badge.answer_score.100_score"),
 
     // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
     VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),
@@ -34,10 +50,6 @@ public enum BadgeType {
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
-    QUESTION_SERIES(BadgeClass.META, "badge.question_series"),
-    QUESTION_SERIES_5(BadgeClass.BRONZE, "badge.question_series.5_days"),
-    QUESTION_SERIES_30(BadgeClass.SILVER, "badge.question_series.30_days"),
-    QUESTION_SERIES_100(BadgeClass.GOLD, "badge.question_series.100_days"),
     QUESTION_FAVOURITE_10(BadgeClass.BRONZE, "badge.question_favourite.10_people"),
     QUESTION_FAVOURITE_25(BadgeClass.SILVER, "badge.question_favourite.25_people"),
     QUESTION_FAVOURITE_50(BadgeClass.GOLD, "badge.question_favourite.50_people"),
@@ -46,9 +58,6 @@ public enum BadgeType {
     ANSWER_ACCEPTED_DIFFERENT_TAGS_10(BadgeClass.BRONZE, "badge.answer_accepted.10_tags"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_25(BadgeClass.SILVER, "badge.answer_accepted.25_tags"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_50(BadgeClass.GOLD, "badge.answer_accepted.50_tags"),
-    ANSWER_SCORE_10(BadgeClass.BRONZE, "badge.answer_score.10_score"),
-    ANSWER_SCORE_25(BadgeClass.SILVER, "badge.answer_score.25_score"),
-    ANSWER_SCORE_100(BadgeClass.GOLD, "badge.answer_score.100_score"),
     ANSWER_OUTSCORE_ACCEPTED(BadgeClass.SILVER, "badge.answer_outscore.2_factor"),
     ANSWER_OUTSCORE_ACCEPTED_10(BadgeClass.GOLD, "badge.answer_outscore.5_factor"),
     ANSWER_REVIVE_QUESTION_30(BadgeClass.BRONZE, "badge.answer_revive_question.30_day"),
