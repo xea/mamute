@@ -23,6 +23,8 @@ public enum BadgeType {
 
     // Post your first answer
     FIRST_ANSWER(BadgeClass.BRONZE, "badge.first_answer"),
+    // First answer to the a question that is accepted with a score of 10 or more
+    FIRST_ANSWER_ACCEPTED_SCORE_10(BadgeClass.SILVER, "badge.first_to_answer_accepted_score_10", true),
 
     // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
     VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -42,6 +43,12 @@ public class BadgeEventObserver {
         return question.getAuthor();
     }
 
+    public User answerAuthor(final BadgeEvent event) {
+        final Answer answer = (Answer) event.getContext();
+
+        return answer.getAuthor();
+    }
+
     public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
         final List<Evaluator> evaluators = new ArrayList<>();
 
@@ -58,8 +65,11 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_SCORE_25, this::questionAuthor, this::questionScore25));
                 evaluators.add(new Evaluator(QUESTION_SCORE_100, this::questionAuthor, this::questionScore100));
                 break;
+            case ANSWER_UPVOTE:
+                evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
+                evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
                 break;
             case LOGIN:
                 evaluators.add(new Evaluator(VISIT_30_CONSECUTIVE_DAYS, this::currentUser, this::visit30ConsecutiveDays));
@@ -88,7 +98,12 @@ public class BadgeEventObserver {
     }
 
     protected boolean canAward(final BadgeType badgeType, final User user, final BadgeEvent event) {
-        return (!user.hasBadge(badgeType, event.getContext().getId()) || badgeType.isMultiBadge());
+        final boolean hasBadgeCtx = user.hasBadge(badgeType, Optional.ofNullable(event.getContext()));
+        final boolean hasBadge = user.hasBadge(badgeType);
+
+        final boolean cantHave = hasBadgeCtx || (hasBadge && !badgeType.isMultiBadge());
+
+        return !cantHave;
     }
 
     public boolean firstQuestion(final BadgeEvent event, final User badgeUser) {
@@ -121,6 +136,18 @@ public class BadgeEventObserver {
 
     public boolean acceptFirstSolution(final BadgeEvent event, final User user) {
         return true;
+    }
+
+    public boolean firstAnswerAcceptedScore10(final BadgeEvent event, final User user) {
+        final Answer answer = (Answer) event.getContext();
+
+        final boolean isFirstAnswer = answer.getQuestion().getAnswers().get(0).getId().equals(answer.getId());
+
+        if (answer.isSolution() && answer.getVoteCount() >= 10 && isFirstAnswer) {
+            return true;
+        }
+
+        return false;
     }
 
     public boolean questionScore10(final BadgeEvent event, final User user) {

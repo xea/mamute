@@ -481,6 +481,14 @@ public class User implements Identifiable {
 		return getBadgeCount(badgeType) > 0;
 	}
 
+	public boolean hasBadge(BadgeType badgeType, Optional<ReputationEventContext> maybeCtx) {
+		if (maybeCtx.isPresent()) {
+			return hasBadge(badgeType, maybeCtx.get().getId());
+		} else {
+			return hasBadge(badgeType);
+		}
+	}
+
 	public boolean hasBadge(BadgeType badgeType, long id) {
 		return getBadges(badgeType).stream().filter(b -> b.getContextId() == id).findFirst().isPresent();
 	}

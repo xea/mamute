@@ -122,7 +122,6 @@ public class AnswerController {
 			return;
 		} 
         markOrRemoveSolution(solution);
-		badgeEvent.fire(new BadgeEvent(EventType.MARKED_SOLUTION, currentUser.getCurrent(), solution));
         result.nothing();
 	}
 
@@ -159,6 +158,7 @@ public class AnswerController {
 		}
 		answer.markAsSolution();
 		increaseKarmaOfUsersInvolved(answer);
+		badgeEvent.fire(new BadgeEvent(EventType.MARKED_SOLUTION, currentUser.getCurrent(), answer));
 	}
 
     
