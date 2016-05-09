@@ -1,6 +1,7 @@
 package org.mamute.observer;
 
 import br.com.caelum.vraptor.Result;
+import org.joda.time.DateTime;
 import org.mamute.dao.BadgeDAO;
 import org.mamute.dao.ReputationEventDAO;
 import org.mamute.dao.UserDAO;
@@ -10,6 +11,7 @@ import org.mamute.model.*;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +77,10 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(ANSWER_SCORE_10, this::answerAuthor, this::answerScore10));
                 evaluators.add(new Evaluator(ANSWER_SCORE_25, this::answerAuthor, this::answerScore25));
                 evaluators.add(new Evaluator(ANSWER_SCORE_100, this::answerAuthor, this::answerScore100));
+                evaluators.add(new Evaluator(ANSWER_OUTSCORE_ACCEPTED_2, this::answerAuthor, this::answerOutscore2));
+                evaluators.add(new Evaluator(ANSWER_OUTSCORE_ACCEPTED_5, this::answerAuthor, this::answerOutscore5));
+                evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_30, this::answerAuthor, this::reviveAnswer30));
+                evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_60, this::answerAuthor, this::reviveAnswer60));
                 break;
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
@@ -241,6 +247,51 @@ public class BadgeEventObserver {
         final boolean award = answer.getVoteCount() > threshold;
 
         return award;
+    }
+
+    public boolean answerOutscore2(final BadgeEvent event, final User user) {
+        return answerOutscore(event, 2);
+    }
+
+    public boolean answerOutscore5(final BadgeEvent event, final User user) {
+        return answerOutscore(event, 5);
+    }
+
+    public boolean answerOutscore(final BadgeEvent event, final long multiplier) {
+        final Answer answer = (Answer) event.getContext();
+        final Answer solution = answer.getQuestion().getSolution();
+
+        // TODO: this doesn't trigger well until there was an upvote *after* accepting another answer
+
+        if (solution != null) {
+            if (answer.getVoteCount() / multiplier >= solution.getVoteCount()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean reviveAnswer30(final BadgeEvent event, final User user) {
+        return reviveAnswer(event, 30, 2);
+    }
+
+    public boolean reviveAnswer60(final BadgeEvent event, final User user) {
+        return reviveAnswer(event, 60, 5);
+    }
+
+    public boolean reviveAnswer(final BadgeEvent event, final long days, final long minScore) {
+        final Answer answer = (Answer) event.getContext();
+
+        final DateTime dateLimit = answer.getCreatedAt().minus(org.joda.time.Duration.standardDays(days));
+
+        if (dateLimit.isAfter(answer.getQuestion().getCreatedAt())) {
+            if (answer.getVoteCount() >= minScore) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static class Evaluator {
