@@ -2,6 +2,7 @@ package org.mamute.controllers;
 
 import java.util.List;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.mamute.auth.rules.PermissionRules;
@@ -10,6 +11,7 @@ import org.mamute.brutauth.auth.rules.EnvironmentKarmaRule;
 import org.mamute.dao.InformationDAO;
 import org.mamute.dao.ModeratableDao;
 import org.mamute.dao.ReputationEventDAO;
+import org.mamute.event.BadgeEvent;
 import org.mamute.infra.ModelUrlMapping;
 import org.mamute.model.Answer;
 import org.mamute.model.AnswerInformation;
@@ -45,6 +47,7 @@ public class HistoryController extends BaseController {
 	@Inject private ModelUrlMapping urlMapping;
 	@Inject private ReputationEventDAO reputationEvents;
 	@Inject private EnvironmentKarma environmentKarma;
+	@Inject private Event<BadgeEvent> badgeEvent;
 
 	@SimpleBrutauthRules({EnvironmentKarmaRule.class})
 	@EnvironmentAccessLevel(PermissionRules.MODERATE_EDITS)
@@ -109,6 +112,8 @@ public class HistoryController extends BaseController {
         int karma = calculator.karmaFor(editAppoved);
         approvedAuthor.increaseKarma(karma);
         reputationEvents.save(editAppoved);
+
+		badgeEvent.fire(new BadgeEvent(EventType.EDIT_APPROVED, approvedAuthor));
         
         result.redirectTo(this).history();
     }

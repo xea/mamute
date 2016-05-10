@@ -12,7 +12,6 @@ import org.mamute.model.*;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +53,10 @@ public class BadgeEventObserver {
         return answer.getAuthor();
     }
 
+    public User eventSubject(final BadgeEvent event) {
+        return event.getUser();
+    }
+
     public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
         final List<Evaluator> evaluators = new ArrayList<>();
 
@@ -69,11 +72,15 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_SCORE_10, this::questionAuthor, this::questionScore10));
                 evaluators.add(new Evaluator(QUESTION_SCORE_25, this::questionAuthor, this::questionScore25));
                 evaluators.add(new Evaluator(QUESTION_SCORE_100, this::questionAuthor, this::questionScore100));
+                evaluators.add(new Evaluator(FIRST_UPVOTE, this::currentUser, this::firstUpvote));
                 /* not implemented yet
                 evaluators.add(new Evaluator(QUESTION_SERIES_5, this::questionAuthor, this::questionSeries5));
                 evaluators.add(new Evaluator(QUESTION_SERIES_30, this::questionAuthor, this::questionSeries30));
                 evaluators.add(new Evaluator(QUESTION_SERIES_100, this::questionAuthor, this::questionSeries100));
                 */
+                break;
+            case QUESTION_DOWNVOTE:
+                evaluators.add(new Evaluator(FIRST_DOWNVOTE, this::currentUser, this::firstDownvote));
                 break;
             case ANSWER_UPVOTE:
                 evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
@@ -84,6 +91,11 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(ANSWER_OUTSCORE_ACCEPTED_5, this::answerAuthor, this::answerOutscore5));
                 evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_30, this::answerAuthor, this::reviveAnswer30));
                 evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_60, this::answerAuthor, this::reviveAnswer60));
+                evaluators.add(new Evaluator(ANSWER_OWN_QUESTION_SCORE_2, this::answerAuthor, this::answerOwnScore2));
+                evaluators.add(new Evaluator(FIRST_UPVOTE, this::currentUser, this::firstUpvote));
+                break;
+            case ANSWER_DOWNVOTE:
+                evaluators.add(new Evaluator(FIRST_DOWNVOTE, this::currentUser, this::firstDownvote));
                 break;
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
@@ -103,6 +115,12 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(COMMENT_50, this::currentUser, this::comment50));
                 evaluators.add(new Evaluator(COMMENT_10_SCORE_5, this::currentUser, this::comment10Score5));
                 evaluators.add(new Evaluator(COMMENT_50_SCORE_5, this::currentUser, this::comment50Score5));
+                break;
+            case PROFILE_COMPLETED:
+                evaluators.add(new Evaluator(AUTOBIOGRAPHY_COMPLETE, this::currentUser, this::autoBiography));
+                break;
+            case EDIT_APPROVED:
+                evaluators.add(new Evaluator(FIRST_EDIT_APPROVED, this::eventSubject, this::firstEdit));
                 break;
             default:
                 break;
@@ -281,6 +299,14 @@ public class BadgeEventObserver {
         return false;
     }
 
+    public boolean answerOwnScore2(final BadgeEvent event, final User user) {
+        final Answer answer = (Answer) event.getContext();
+
+        final boolean award = answer.isTheSameAuthorOfQuestion() && answer.getVoteCount() > 2;
+
+        return award;
+    }
+
     public boolean reviveAnswer30(final BadgeEvent event, final User user) {
         return reviveAnswer(event, 30, 2);
     }
@@ -330,6 +356,22 @@ public class BadgeEventObserver {
             }
         }
         return false;
+    }
+
+    public boolean firstUpvote(final BadgeEvent event, final User user) {
+        return true;
+    }
+
+    public boolean firstDownvote(final BadgeEvent event, final User user) {
+        return true;
+    }
+
+    public boolean autoBiography(final BadgeEvent event, final User user) {
+        return true;
+    }
+
+    public boolean firstEdit(final BadgeEvent event, final User user) {
+        return true;
     }
 
     private static class Evaluator {

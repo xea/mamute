@@ -46,9 +46,13 @@ public enum BadgeType {
     // Post an answer that outscores the accepted answer by the factor of five
     ANSWER_OUTSCORE_ACCEPTED_5(BadgeClass.GOLD, "badge.answer_outscore.5_factor", true),
     // Answer a question more than 30 days after it was asked with a score of 2
-    ANSWER_REVIVE_QUESTION_30(BadgeClass.BRONZE, "badge.answer_revive_question.30_day"),
+    ANSWER_REVIVE_QUESTION_30(BadgeClass.BRONZE, "badge.answer_revive_question.30_day", true),
     // Answer a question more than 60 days after it was asked with a score of 5
-    ANSWER_REVIVE_QUESTION_60(BadgeClass.SILVER, "badge.answer_revive_question.60_day"),
+    ANSWER_REVIVE_QUESTION_60(BadgeClass.SILVER, "badge.answer_revive_question.60_day", true),
+    // Answer own question with a score of 2
+    ANSWER_OWN_QUESTION_SCORE_2(BadgeClass.BRONZE, "badge.answer_own_question.2_score", true),
+    // Answer accepted with a score of 40
+    ANSWER_ACCEPTED_SCORE_40(BadgeClass.SILVER, "badge.answer_accepted_score_40", true),
 
     // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
     VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),
@@ -64,6 +68,15 @@ public enum BadgeType {
     // Leave 50 comments with a score of at least 5
     COMMENT_50_SCORE_5(BadgeClass.GOLD, "badge.comment_50.score_5"),
 
+    // First upvote
+    FIRST_UPVOTE(BadgeClass.BRONZE, "badge.first_upvote"),
+    // First downvote
+    FIRST_DOWNVOTE(BadgeClass.BRONZE, "badge.first_downvote"),
+    // First edit approved
+    FIRST_EDIT_APPROVED(BadgeClass.BRONZE, "badge.first_edit_approved"),
+
+    // Fill all fields in profile
+    AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
@@ -71,19 +84,14 @@ public enum BadgeType {
     QUESTION_FAVOURITE_25(BadgeClass.SILVER, "badge.question_favourite.25_people"),
     QUESTION_FAVOURITE_50(BadgeClass.GOLD, "badge.question_favourite.50_people"),
 
-    FIRST_TO_ANSWER_ACCEPTED(BadgeClass.SILVER, "badge.first_accepted_answer"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_10(BadgeClass.BRONZE, "badge.answer_accepted.10_tags"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_25(BadgeClass.SILVER, "badge.answer_accepted.25_tags"),
     ANSWER_ACCEPTED_DIFFERENT_TAGS_50(BadgeClass.GOLD, "badge.answer_accepted.50_tags"),
-    ANSWER_OWN_QUESTION_SCORE_2(BadgeClass.BRONZE, "badge.answer_own_question.2_score"),
     ANSWER_ACCEPTED_NO_SCORE_5(BadgeClass.SILVER, "badge.answer_accepted_no_score.5_times"),
     ANSWER_ACCEPTED_NO_SCORE_10(BadgeClass.GOLD, "badge.answer_accepted_no_score.10_times"),
 
     FIRST_BOUNTY_OFFER_SELF(BadgeClass.BRONZE, "badge.bounty_offer.self"),
     FIRST_BOUNTY_OFFER_OTHER(BadgeClass.BRONZE, "badge.bounty_offer.other"),
-
-    AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
-
 
     EARN_200_DAILY_REPUTATION_1_DAY(BadgeClass.BRONZE, "badge.earn_200_rep.1_day"),
     EARN_200_DAILY_REPUTATION_50_DAYS(BadgeClass.SILVER, "badge.earn_200_rep.50_days"),

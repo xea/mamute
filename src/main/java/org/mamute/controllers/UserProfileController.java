@@ -8,12 +8,14 @@ import br.com.caelum.vraptor.hibernate.extra.Load;
 import br.com.caelum.vraptor.observer.upload.UploadedFile;
 import br.com.caelum.vraptor.routes.annotation.Routed;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.mamute.brutauth.auth.rules.LoggedRule;
 import org.mamute.brutauth.auth.rules.ModeratorOnlyRule;
 import org.mamute.dao.*;
 import org.mamute.dao.WithUserPaginatedDAO.OrderType;
 import org.mamute.dto.UserPersonalInfo;
+import org.mamute.event.BadgeEvent;
 import org.mamute.factory.MessageFactory;
 import org.mamute.filesystem.AttachmentsFileStorage;
 import org.mamute.filesystem.ImageStore;
@@ -21,6 +23,7 @@ import org.mamute.infra.ClientIp;
 import org.mamute.model.*;
 import org.mamute.validators.UserPersonalInfoValidator;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.io.IOException;
 
@@ -55,6 +58,7 @@ public class UserProfileController extends BaseController{
     @Inject private Environment environment;
     @Inject private CommentDAO comments;
 	@Inject private BadgeDAO badges;
+	@Inject private Event<BadgeEvent> badgeEvent;
 
 	@Get
 	public void showProfile(@Load User user, String sluggedName){
@@ -153,6 +157,8 @@ public class UserProfileController extends BaseController{
 		users.updateLoginMethod(user, email);
 		
 		user.setPersonalInformation(info);
+
+		checkCompleteProfile(info);
 		
 		result.redirectTo(this).showProfile(user, user.getSluggedName());
 	}
@@ -237,5 +243,20 @@ public class UserProfileController extends BaseController{
 			return true;
 		}
 		return false;
+	}
+
+	private void checkCompleteProfile(UserPersonalInfo info) {
+		final boolean aboutFilled = StringUtils.isNotEmpty(info.getAbout());
+		final boolean emailFilled = StringUtils.isNotEmpty(info.getEmail());
+		final boolean locationFilled = StringUtils.isNotEmpty(info.getLocation());
+		final boolean markedAboutFilled = StringUtils.isNotEmpty(info.getMarkedAbout());
+		final boolean nameFilled = StringUtils.isNotEmpty(info.getName());
+		final boolean websiteFilled = StringUtils.isNotEmpty(info.getWebsite());
+		final boolean birthDateFilled = info.getBirthDate() != null;
+
+		if (aboutFilled && emailFilled && locationFilled && markedAboutFilled && nameFilled
+				&& websiteFilled && birthDateFilled) {
+			badgeEvent.fire(new BadgeEvent(EventType.PROFILE_COMPLETED, currentUser.getCurrent()));
+		}
 	}
 }

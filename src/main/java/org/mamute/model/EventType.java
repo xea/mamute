@@ -126,6 +126,10 @@ public enum EventType implements KarmaRewardEvent {
 	QUESTION_VIEW {
 		@Override
 		public Integer reward() { return 0; }
+	},
+	PROFILE_COMPLETED {
+		@Override
+		public Integer reward() { return 0; }
 	};
 
 	private static int karma;
