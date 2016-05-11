@@ -71,6 +71,10 @@ public enum EventType implements KarmaRewardEvent {
 			return 0;
 		}
 	},
+	DELETED_ANSWER {
+		@Override
+		public Integer reward() { return 0; }
+	},
 	DOWNVOTED_SOMETHING {
 		@Override
 		public Integer reward() {

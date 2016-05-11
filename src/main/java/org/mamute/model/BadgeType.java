@@ -75,6 +75,11 @@ public enum BadgeType {
     // First edit approved
     FIRST_EDIT_APPROVED(BadgeClass.BRONZE, "badge.first_edit_approved"),
 
+    // Delete own post with score 3
+    DELETE_OWN_POST_SCORE_3(BadgeClass.BRONZE, "badge.delete_own_answer.score_3", true),
+    // Delete own post with score -3
+    DELETE_OWN_POST_SCORE_MINUES_3(BadgeClass.BRONZE, "badge.delete_own_answer.score_minus_3", true),
+
     // Fill all fields in profile
     AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
 /*

@@ -92,6 +92,7 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_30, this::answerAuthor, this::reviveAnswer30));
                 evaluators.add(new Evaluator(ANSWER_REVIVE_QUESTION_60, this::answerAuthor, this::reviveAnswer60));
                 evaluators.add(new Evaluator(ANSWER_OWN_QUESTION_SCORE_2, this::answerAuthor, this::answerOwnScore2));
+                evaluators.add(new Evaluator(ANSWER_ACCEPTED_SCORE_40, this::answerAuthor, this::answerAcceptedScore40));
                 evaluators.add(new Evaluator(FIRST_UPVOTE, this::currentUser, this::firstUpvote));
                 break;
             case ANSWER_DOWNVOTE:
@@ -121,6 +122,10 @@ public class BadgeEventObserver {
                 break;
             case EDIT_APPROVED:
                 evaluators.add(new Evaluator(FIRST_EDIT_APPROVED, this::eventSubject, this::firstEdit));
+                break;
+            case DELETED_ANSWER:
+                evaluators.add(new Evaluator(DELETE_OWN_POST_SCORE_3, this::currentUser, this::deleteOwnPostScore3));
+                evaluators.add(new Evaluator(DELETE_OWN_POST_SCORE_MINUES_3, this::currentUser, this::deleteOwnPostScoreMinus3));
                 break;
             default:
                 break;
@@ -276,6 +281,14 @@ public class BadgeEventObserver {
         return award;
     }
 
+    public boolean answerAcceptedScore40(final BadgeEvent event, final User user) {
+        final Answer answer = (Answer) event.getContext();
+
+        final boolean award = answerScore(event, 40) && answer.isSolution();
+
+        return award;
+    }
+
     public boolean answerOutscore2(final BadgeEvent event, final User user) {
         return answerOutscore(event, 2);
     }
@@ -372,6 +385,22 @@ public class BadgeEventObserver {
 
     public boolean firstEdit(final BadgeEvent event, final User user) {
         return true;
+    }
+
+    public boolean deleteOwnPostScore3(final BadgeEvent event, final User user) {
+        final Answer answer = (Answer) event.getContext();
+
+        final boolean award = (answer.getAuthor().equals(user) && answer.getVoteCount() >= 3);
+
+        return award;
+    }
+
+    public boolean deleteOwnPostScoreMinus3(final BadgeEvent event, final User user) {
+        final Answer answer = (Answer) event.getContext();
+
+        final boolean award = (answer.getAuthor().equals(user) && answer.getVoteCount() <= -3);
+
+        return award;
     }
 
     private static class Evaluator {
