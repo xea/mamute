@@ -74,6 +74,8 @@ public enum BadgeType {
     FIRST_DOWNVOTE(BadgeClass.BRONZE, "badge.first_downvote"),
     // First edit approved
     FIRST_EDIT_APPROVED(BadgeClass.BRONZE, "badge.first_edit_approved"),
+    // First flagged post
+    FIRST_FLAG(BadgeClass.BRONZE, "badge.first_flag"),
 
     // Delete own post with score 3
     DELETE_OWN_POST_SCORE_3(BadgeClass.BRONZE, "badge.delete_own_answer.score_3", true),

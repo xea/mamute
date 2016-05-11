@@ -134,6 +134,10 @@ public enum EventType implements KarmaRewardEvent {
 	PROFILE_COMPLETED {
 		@Override
 		public Integer reward() { return 0; }
+	},
+	POST_FLAGGED {
+		@Override
+		public Integer reward() { return 0; }
 	};
 
 	private static int karma;

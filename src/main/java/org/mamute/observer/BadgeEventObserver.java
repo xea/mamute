@@ -127,6 +127,9 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(DELETE_OWN_POST_SCORE_3, this::currentUser, this::deleteOwnPostScore3));
                 evaluators.add(new Evaluator(DELETE_OWN_POST_SCORE_MINUES_3, this::currentUser, this::deleteOwnPostScoreMinus3));
                 break;
+            case POST_FLAGGED:
+                evaluators.add(new Evaluator(FIRST_FLAG, this::currentUser, this::firstFlag));
+                break;
             default:
                 break;
         }
@@ -376,6 +379,10 @@ public class BadgeEventObserver {
     }
 
     public boolean firstDownvote(final BadgeEvent event, final User user) {
+        return true;
+    }
+
+    public boolean firstFlag(final BadgeEvent event, final User user) {
         return true;
     }
 

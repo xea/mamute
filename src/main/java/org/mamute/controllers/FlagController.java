@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.common.base.Predicate;
@@ -18,13 +19,9 @@ import org.mamute.dao.FlagDao;
 import org.mamute.dao.FlaggableDAO;
 import org.mamute.dao.QuestionDAO;
 import org.mamute.dto.FlaggableAndFlagCount;
+import org.mamute.event.BadgeEvent;
 import org.mamute.infra.ModelUrlMapping;
-import org.mamute.model.Answer;
-import org.mamute.model.Comment;
-import org.mamute.model.Flag;
-import org.mamute.model.FlagType;
-import org.mamute.model.LoggedUser;
-import org.mamute.model.Question;
+import org.mamute.model.*;
 import org.mamute.model.flag.FlagTrigger;
 import org.mamute.model.interfaces.Flaggable;
 
@@ -48,6 +45,7 @@ public class FlagController {
 	@Inject private AnswerDAO answers;
 	@Inject private ModelUrlMapping urlMapping;
 	@Inject private FlagTrigger flagTrigger;
+	@Inject private Event<BadgeEvent> badgeEvent;
 
 	@SimpleBrutauthRules({EnvironmentKarmaRule.class})
 	@EnvironmentAccessLevel(PermissionRules.CREATE_FLAG)
@@ -74,6 +72,8 @@ public class FlagController {
 		
 		flags.save(flag);
 		flaggable.add(flag);
+
+		badgeEvent.fire(new BadgeEvent(EventType.POST_FLAGGED, loggedUser.getCurrent()));
 		
 		result.nothing();
 	}
