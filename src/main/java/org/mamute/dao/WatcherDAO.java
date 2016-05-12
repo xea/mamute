@@ -71,11 +71,13 @@ public class WatcherDAO implements PaginatableDAO {
 		return watch;
 	}
 
-	public void addOrRemove(Watchable watchable, Watcher watcher) {
+	public boolean addOrRemove(Watchable watchable, Watcher watcher) {
 		if(!alreadyWatching(watchable, watcher)) {
 			add(watchable, watcher);
+			return true;
 		} else {
 			removeIfWatching(watchable, watcher);
+			return false;
 		}
 	}
 

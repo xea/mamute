@@ -2,10 +2,7 @@ package org.mamute.observer;
 
 import br.com.caelum.vraptor.Result;
 import org.joda.time.DateTime;
-import org.mamute.dao.BadgeDAO;
-import org.mamute.dao.CommentDAO;
-import org.mamute.dao.ReputationEventDAO;
-import org.mamute.dao.UserDAO;
+import org.mamute.dao.*;
 import org.mamute.event.BadgeEvent;
 import org.mamute.factory.MessageFactory;
 import org.mamute.model.*;
@@ -18,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.mamute.model.BadgeType.*;
 
@@ -32,6 +30,8 @@ public class BadgeEventObserver {
     @Inject private UserDAO userDAO;
 
     @Inject private CommentDAO commentDAO;
+
+    @Inject private AnswerDAO answerDAO;
 
     @Inject private MessageFactory messageFactory;
 
@@ -57,12 +57,30 @@ public class BadgeEventObserver {
         return event.getUser();
     }
 
+    public List<TagUsage> extractTagUsages(final BadgeEvent event) {
+        final Question question = (Question) event.getContext();
+
+        return question.getTagsUsage();
+    }
+
+    public List<Evaluator> generateEvaluators(final BadgeType badgeType, final List<TagUsage> tagUsages, final Function<TagUsage, Boolean> fn) {
+        return tagUsages.stream().map(tu -> generateEvaluator(badgeType, tu, fn)).collect(Collectors.toList());
+    }
+
+    public Evaluator generateEvaluator(final BadgeType badgeType, final TagUsage tagUsage, final Function<TagUsage, Boolean> fn) {
+        return new Evaluator(badgeType, (event) -> tagUsage.getTag().getAuthor(), (be, u) -> fn.apply(tagUsage), (be) -> tagUsage.getTag().getId());
+    }
+
     public void subscribeEvents(@Observes BadgeEvent badgeEvent) {
         final List<Evaluator> evaluators = new ArrayList<>();
 
         switch (badgeEvent.getEventType()) {
             case CREATED_QUESTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION, this::currentUser, this::firstQuestion));
+
+                generateEvaluators(CREATE_TAG_USED_50_QUESTIONS, extractTagUsages(badgeEvent), this::createTag50Questions)
+                        .forEach(ev -> evaluators.add(ev));
+
                 break;
             case CREATED_ANSWER:
                 evaluators.add(new Evaluator(FIRST_ANSWER, this::currentUser, this::firstAnswer));
@@ -101,6 +119,8 @@ public class BadgeEventObserver {
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
                 evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
+                evaluators.add(new Evaluator(ZERO_SCORE_ANSWER_5, this::answerAuthor, this::zeroScoreAnswer5));
+                evaluators.add(new Evaluator(ZERO_SCORE_ANSWER_10, this::answerAuthor, this::zeroScoreAnswer10));
                 break;
             case LOGIN:
                 evaluators.add(new Evaluator(VISIT_30_CONSECUTIVE_DAYS, this::currentUser, this::visit30ConsecutiveDays));
@@ -130,6 +150,11 @@ public class BadgeEventObserver {
             case POST_FLAGGED:
                 evaluators.add(new Evaluator(FIRST_FLAG, this::currentUser, this::firstFlag));
                 break;
+            case QUESTION_WATCHED:
+                evaluators.add(new Evaluator(QUESTION_FAVOURITE_10, this::questionAuthor, this::watchedQuestion10));
+                evaluators.add(new Evaluator(QUESTION_FAVOURITE_25, this::questionAuthor, this::watchedQuestion25));
+                evaluators.add(new Evaluator(QUESTION_FAVOURITE_50, this::questionAuthor, this::watchedQuestion50));
+                break;
             default:
                 break;
         }
@@ -139,15 +164,22 @@ public class BadgeEventObserver {
         for (final Evaluator ev : evaluators) {
             final User user = ev.extractor.apply(badgeEvent);
 
+            ev.evaluate(badgeEvent).stream().forEach(b -> {
+                result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", b.getBadgeKey())));
+                badgeDAO.awardBadge(b);
+            });
+
+            /*
             if (canAward(ev.badgeType, user, badgeEvent) && ev.evaluator.apply(badgeEvent, user)) {
                 final Badge newBadge = new Badge(user, ev.badgeType, badgeEvent.getContext());
                 result.include("mamuteMessages", Arrays.asList(messageFactory.build("badge-award", "badge.awarded", newBadge.getBadgeKey())));
                 badgeDAO.awardBadge(newBadge);
-            }
+            }*/
+
         }
     }
 
-    protected boolean canAward(final BadgeType badgeType, final User user, final BadgeEvent event) {
+    protected static boolean canAward(final BadgeType badgeType, final User user, final BadgeEvent event) {
         final boolean hasBadgeCtx = user.hasBadge(badgeType, Optional.ofNullable(event.getContext()));
         final boolean hasBadge = user.hasBadge(badgeType);
 
@@ -345,6 +377,49 @@ public class BadgeEventObserver {
         return false;
     }
 
+    public boolean zeroScoreAnswer5(final BadgeEvent event, final User user) {
+        return zeroScoreAnswer(event, user, 5, 20);
+    }
+
+    public boolean zeroScoreAnswer10(final BadgeEvent event, final User user) {
+        return zeroScoreAnswer(event, user, 10, 25);
+    }
+
+    public boolean zeroScoreAnswer(final BadgeEvent event, final User user, final long threshold, final long limit) {
+        final Answer currentAnswer = (Answer) event.getContext();
+
+        if (currentAnswer.getVoteCount() == 0) {
+            final List<Answer> acceptedAnswers = answerDAO.acceptedAnswers(user);
+            final long zeroCount = acceptedAnswers.stream().filter(a -> a.getVoteCount() == 0).count();
+
+            if (zeroCount >= threshold && zeroCount * 100 / acceptedAnswers.size() >= limit) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean watchedQuestion10(final BadgeEvent event, final User user) {
+        return watchedQuestion(event, 10);
+    }
+
+    public boolean watchedQuestion25(final BadgeEvent event, final User user) {
+        return watchedQuestion(event, 25);
+    }
+
+    public boolean watchedQuestion50(final BadgeEvent event, final User user) {
+        return watchedQuestion(event, 50);
+    }
+
+    public boolean watchedQuestion(final BadgeEvent event, final long threshold) {
+        final Question question = (Question) event.getContext();
+
+        final boolean award = (question.getWatchers().size() >= threshold);
+
+        return award;
+    }
+
     public boolean comment10(final BadgeEvent event, final User user) {
         return leaveComment(user, 10, 0);
     }
@@ -410,6 +485,12 @@ public class BadgeEventObserver {
         return award;
     }
 
+    public boolean createTag50Questions(final TagUsage tagUsage) {
+        final boolean award = tagUsage.getUsage() > 50;
+
+        return award;
+    }
+
     private static class Evaluator {
 
         public final BadgeType badgeType;
@@ -418,10 +499,38 @@ public class BadgeEventObserver {
 
         public final BiFunction<BadgeEvent, User, Boolean> evaluator;
 
+        public final Optional<Function<BadgeEvent, Long>> ctx;
+
         public Evaluator(final BadgeType badgeType, final Function<BadgeEvent, User> extractor, final BiFunction<BadgeEvent, User, Boolean> evaluator) {
             this.badgeType = badgeType;
             this.extractor = extractor;
             this.evaluator = evaluator;
+            this.ctx = Optional.empty();
         }
+
+        public Evaluator(final BadgeType badgeType, final Function<BadgeEvent, User> extractor, final BiFunction<BadgeEvent, User, Boolean> evaluator, final Function<BadgeEvent, Long> ctxExtractor) {
+            this.badgeType = badgeType;
+            this.extractor = extractor;
+            this.evaluator = evaluator;
+            this.ctx = Optional.of(ctxExtractor);
+        }
+
+        public List<Badge> evaluate(final BadgeEvent event) {
+            final User user = extractor.apply(event);
+            final List<Badge> badges = new ArrayList<>();
+
+            if (canAward(badgeType, user, event) && evaluator.apply(event, user)) {
+                final Badge newBadge;
+
+                newBadge = ctx.map(e -> new Badge(user, badgeType, e.apply(event)))
+                        .orElse(new Badge(user, badgeType, event.getContext()));
+
+                badges.add(newBadge);
+            }
+
+            return badges;
+        }
+
     }
+
 }

@@ -131,6 +131,10 @@ public enum EventType implements KarmaRewardEvent {
 		@Override
 		public Integer reward() { return 0; }
 	},
+	QUESTION_WATCHED {
+		@Override
+		public Integer reward() { return 0; }
+	},
 	PROFILE_COMPLETED {
 		@Override
 		public Integer reward() { return 0; }

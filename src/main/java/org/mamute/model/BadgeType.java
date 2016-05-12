@@ -53,6 +53,10 @@ public enum BadgeType {
     ANSWER_OWN_QUESTION_SCORE_2(BadgeClass.BRONZE, "badge.answer_own_question.2_score", true),
     // Answer accepted with a score of 40
     ANSWER_ACCEPTED_SCORE_40(BadgeClass.SILVER, "badge.answer_accepted_score_40", true),
+    // Zero score accepted answer, more than 5 and 20% of total
+    ZERO_SCORE_ANSWER_5(BadgeClass.SILVER, "badge.zero_score_answer_5"),
+    // Zero score accepted answer, more than 10 and 25% of total
+    ZERO_SCORE_ANSWER_10(BadgeClass.GOLD, "badge.zero_score_answer_10"),
 
     // Log in on 30 consecutive days (days as in not more than 24 hours than last login)
     VISIT_30_CONSECUTIVE_DAYS(BadgeClass.SILVER, "badge.visit.30_days"),
@@ -82,8 +86,18 @@ public enum BadgeType {
     // Delete own post with score -3
     DELETE_OWN_POST_SCORE_MINUES_3(BadgeClass.BRONZE, "badge.delete_own_answer.score_minus_3", true),
 
+    // Question favourited by 10 people
+    QUESTION_FAVOURITE_10(BadgeClass.BRONZE, "badge.question_favourite_10", true),
+    // Question favourited by 25 people
+    QUESTION_FAVOURITE_25(BadgeClass.SILVER, "badge.question_favourite_25", true),
+    // Question favourited by 50 people
+    QUESTION_FAVOURITE_50(BadgeClass.GOLD, "badge.question_favourite_50", true),
+
     // Fill all fields in profile
     AUTOBIOGRAPHY_COMPLETE(BadgeClass.BRONZE, "badge.autobiography_complete"),
+
+    // Create a tag used by 50 questions
+    CREATE_TAG_USED_50_QUESTIONS(BadgeClass.SILVER, "badge.create_tag.50_questions", true),
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),

@@ -44,7 +44,12 @@ public class AnswerDAO implements PaginatableDAO{
 	public Long countWithAuthor(User user) {
 		return withAuthor.count(user);
 	}
-	
+
+	public List<Answer> acceptedAnswers(User user) {
+		final String hql = "from Answer a where a.author = :user and a.question.solution = a";
+		return session.createQuery(hql).setParameter("user", user).list();
+	}
+
 	public Long numberOfPagesTo(User user) {
 		return withAuthor.numberOfPagesTo(user);
 	}

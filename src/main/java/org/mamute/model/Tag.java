@@ -72,7 +72,7 @@ public class Tag {
 	public Long getId() {
 		return id;
 	}
-	
+
 	public Long getUsageCount() {
 		return usageCount;
 	}
@@ -84,5 +84,8 @@ public class Tag {
 	public void decrementUsage(){
 		this.usageCount --;
 	}
-	
+
+	public User getAuthor() {
+		return author;
+	}
 }

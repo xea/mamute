@@ -1,11 +1,15 @@
 package org.mamute.controllers;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.mamute.brutauth.auth.rules.LoggedRule;
 import org.mamute.dao.WatcherDAO;
+import org.mamute.event.BadgeEvent;
 import org.mamute.infra.ModelUrlMapping;
+import org.mamute.model.EventType;
 import org.mamute.model.LoggedUser;
+import org.mamute.model.Question;
 import org.mamute.model.User;
 import org.mamute.model.interfaces.Watchable;
 import org.mamute.model.watch.Watcher;
@@ -24,6 +28,7 @@ public class WatchController {
 	@Inject private ModelUrlMapping mapping;
 	@Inject private LoggedUser currentUser;
 	@Inject private Result result;
+	@Inject private Event<BadgeEvent> badgeEvent;
 
 	@Post
 	@CustomBrutauthRules(LoggedRule.class)
@@ -31,7 +36,10 @@ public class WatchController {
 		Watchable watchable = watchers.findWatchable(watchableId, mapping.getClassFor(type));
 		User user = currentUser.getCurrent();
 		Watcher watcher = new Watcher(user);
-		watchers.addOrRemove(watchable, watcher);
+		if (watchable instanceof Question && watchers.addOrRemove(watchable, watcher)) {
+			final Question question = (Question) watchable;
+			badgeEvent.fire(new BadgeEvent(EventType.QUESTION_WATCHED, question.getAuthor(), question));
+		}
 		result.nothing();
 	}
 }
