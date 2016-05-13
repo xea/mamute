@@ -163,6 +163,11 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_FAVOURITE_25, this::questionAuthor, this::watchedQuestion25));
                 evaluators.add(new Evaluator(QUESTION_FAVOURITE_50, this::questionAuthor, this::watchedQuestion50));
                 break;
+            case REPUTATION_CHANGED:
+                evaluators.add(new Evaluator(EARN_200_DAILY_REPUTATION_1_DAY, this::eventSubject, this::earn200Reputation1Day));
+                evaluators.add(new Evaluator(EARN_200_DAILY_REPUTATION_25_DAYS, this::eventSubject, this::earn200Reputation25Days));
+                evaluators.add(new Evaluator(EARN_200_DAILY_REPUTATION_100_DAYS, this::eventSubject, this::earn200Reputation100Days));
+                break;
             default:
                 break;
         }
@@ -509,6 +514,28 @@ public class BadgeEventObserver {
 
     public boolean dailyVoteCount(final User user, final long threshold) {
         final boolean award = user.getMetadata().getDailyVoteCount() >= threshold;
+
+        return award;
+    }
+
+    public boolean earn200Reputation1Day(final BadgeEvent event, final User user) {
+        return earn200ReputationInNDays(user, 200, 1);
+    }
+
+    public boolean earn200Reputation25Days(final BadgeEvent event, final User user) {
+        return earn200ReputationInNDays(user, 200, 25);
+    }
+
+    public boolean earn200Reputation100Days(final BadgeEvent event, final User user) {
+        return earn200ReputationInNDays(user, 200, 100);
+    }
+
+    public boolean earn200ReputationInNDays(final User user, final long threshold, final long days) {
+        if (user.getMetadata().getDailyReputation() >= threshold) {
+            user.getMetadata().increaseMaxDailyReputationCount();
+        }
+
+        final boolean award = user.getMetadata().getMaxDailyReputationCount() >= days;
 
         return award;
     }

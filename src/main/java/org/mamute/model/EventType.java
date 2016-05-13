@@ -142,6 +142,10 @@ public enum EventType implements KarmaRewardEvent {
 	POST_FLAGGED {
 		@Override
 		public Integer reward() { return 0; }
+	},
+	REPUTATION_CHANGED {
+		@Override
+		public Integer reward() { return 0; }
 	};
 
 	private static int karma;

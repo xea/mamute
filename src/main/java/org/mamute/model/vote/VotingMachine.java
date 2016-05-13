@@ -1,14 +1,13 @@
 package org.mamute.model.vote;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.mamute.controllers.RetrieveKarmaDownvote;
 import org.mamute.dao.ReputationEventDAO;
 import org.mamute.dao.VoteDAO;
-import org.mamute.model.ReputationEvent;
-import org.mamute.model.ReputationEventContext;
-import org.mamute.model.User;
-import org.mamute.model.Vote;
+import org.mamute.event.BadgeEvent;
+import org.mamute.model.*;
 import org.mamute.model.interfaces.Votable;
 import org.mamute.reputation.rules.KarmaCalculator;
 import org.mamute.reputation.rules.ReceivedVoteEvent;
@@ -20,6 +19,7 @@ public class VotingMachine {
 	private ReputationEventDAO reputationEvents;
 	private MassiveVote voteChecker;
 	private RetrieveKarmaDownvote retrieveDownvote;
+    private Event<BadgeEvent> badgeEvent;
 
 	@Deprecated
 	public VotingMachine() {
@@ -67,6 +67,9 @@ public class VotingMachine {
         	votable.getQuestion().remove();
         	retrieveDownvote.retrieveKarma(votable.getVotes());
         }
+
+        badgeEvent.fire(new BadgeEvent(EventType.REPUTATION_CHANGED, votableAuthor));
+        badgeEvent.fire(new BadgeEvent(EventType.REPUTATION_CHANGED, voter));
     }
     
     public void unRegister(Votable votable, Vote current, Class<?> votableType) {

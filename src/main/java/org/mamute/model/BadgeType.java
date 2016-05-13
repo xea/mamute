@@ -103,6 +103,13 @@ public enum BadgeType {
     USE_30_VOTES_A_DAY(BadgeClass.BRONZE, "badge.use_30_votes_a_day", true),
     // Use 40 votes in a day
     USE_40_VOTES_A_DAY(BadgeClass.SILVER, "badge.use_40_votes_a_day", true),
+
+    // Earn the maximum 200 reputation in one day
+    EARN_200_DAILY_REPUTATION_1_DAY(BadgeClass.BRONZE, "badge.earn_200_rep.1_day"),
+    // Earn the maximum 200 reputation 25 times
+    EARN_200_DAILY_REPUTATION_25_DAYS(BadgeClass.SILVER, "badge.earn_200_rep.25_days"),
+    // Earn the maximum 200 reputation 100 times
+    EARN_200_DAILY_REPUTATION_100_DAYS(BadgeClass.GOLD, "badge.earn_200_rep.100_days"),
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
@@ -119,9 +126,6 @@ public enum BadgeType {
     FIRST_BOUNTY_OFFER_SELF(BadgeClass.BRONZE, "badge.bounty_offer.self"),
     FIRST_BOUNTY_OFFER_OTHER(BadgeClass.BRONZE, "badge.bounty_offer.other"),
 
-    EARN_200_DAILY_REPUTATION_1_DAY(BadgeClass.BRONZE, "badge.earn_200_rep.1_day"),
-    EARN_200_DAILY_REPUTATION_50_DAYS(BadgeClass.SILVER, "badge.earn_200_rep.50_days"),
-    EARN_200_DAILY_REPUTATION_150_DAYS(BadgeClass.GOLD, "badge.earn_200_rep.150_days"),
     */
     ;
 

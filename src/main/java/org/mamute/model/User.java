@@ -352,10 +352,12 @@ public class User implements Identifiable {
 
 	public void descreaseKarma(int value) {
         this.karma -= value;
+		getMetadata().addDailyReputation(-value);
     }
 
     public void increaseKarma(int value) {
         this.karma += value;
+		getMetadata().addDailyReputation(value);
     }
     
     public void confirmEmail(){
