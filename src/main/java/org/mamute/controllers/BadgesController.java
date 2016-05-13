@@ -29,7 +29,7 @@ public class BadgesController {
         result.include("badges", badges);
     }
 
-    private static class BadgeDescription {
+    public static class BadgeDescription {
 
         private String name;
         private String description;
