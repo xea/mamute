@@ -3,6 +3,7 @@ package org.mamute.model;
 public enum MetadataType {
 
     DAILY_REPUTATION("daily_reputation"),
+    DAILY_VOTES("daily_votes"),
     QUESTION_SERIES("question_series"),
     CONSECUTIVE_LOGINS("consecutive_logins");
 

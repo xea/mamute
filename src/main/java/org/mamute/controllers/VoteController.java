@@ -80,16 +80,20 @@ public class VoteController {
 				Question question = questions.getById(id);
 
 				if (voteType == VoteType.UP) {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(1);
 					badgeEvent.fire(new BadgeEvent(EventType.QUESTION_UPVOTE, currentUser.getCurrent(), question));
 				} else {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(-1);
 					badgeEvent.fire(new BadgeEvent(EventType.QUESTION_DOWNVOTE, currentUser.getCurrent(), question));
 				}
 			} else if (votableType.isAssignableFrom(Answer.class)) {
 				Answer answer = answers.getById(id);
 
 				if (voteType == VoteType.UP) {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(1);
 					badgeEvent.fire(new BadgeEvent(EventType.ANSWER_UPVOTE, currentUser.getCurrent(), answer));
 				} else {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(-1);
 					badgeEvent.fire(new BadgeEvent(EventType.ANSWER_DOWNVOTE, currentUser.getCurrent(), answer));
 				}
 			}
@@ -108,6 +112,21 @@ public class VoteController {
 		    votingMachine.unRegister(votable, current, votableType);
 //		    votes.save(current);
 		    result.use(Results.json()).withoutRoot().from(votable.getVoteCount()).serialize();
+
+			if (votableType.isAssignableFrom(Question.class)) {
+				if (voteType == VoteType.UP) {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(-1);
+				} else {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(1);
+				}
+			} else if (votableType.isAssignableFrom(Answer.class)) {
+				if (voteType == VoteType.UP) {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(-1);
+				} else {
+					currentUser.getCurrent().getMetadata().addDailyVoteCount(1);
+				}
+			}
+
 		} catch (IllegalArgumentException e) {
 		    result.use(Results.http()).sendError(409);
 		    return;

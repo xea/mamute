@@ -98,6 +98,11 @@ public enum BadgeType {
 
     // Create a tag used by 50 questions
     CREATE_TAG_USED_50_QUESTIONS(BadgeClass.SILVER, "badge.create_tag.50_questions", true),
+
+    // Use 30 votes in a day
+    USE_30_VOTES_A_DAY(BadgeClass.BRONZE, "badge.use_30_votes_a_day", true),
+    // Use 40 votes in a day
+    USE_40_VOTES_A_DAY(BadgeClass.SILVER, "badge.use_40_votes_a_day", true),
 /*
     // first question completely ignored for a week (no answer, no comment, no score, no views)
     FIRST_QUESTION_IGNORED(BadgeClass.BRONZE, "badge.first_question_ignored"),
