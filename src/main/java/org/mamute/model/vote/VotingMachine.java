@@ -19,7 +19,7 @@ public class VotingMachine {
 	private ReputationEventDAO reputationEvents;
 	private MassiveVote voteChecker;
 	private RetrieveKarmaDownvote retrieveDownvote;
-    private Event<BadgeEvent> badgeEvent;
+    @Inject private Event<BadgeEvent> badgeEvent;
 
 	@Deprecated
 	public VotingMachine() {

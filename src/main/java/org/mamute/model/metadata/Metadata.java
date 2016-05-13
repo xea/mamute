@@ -236,6 +236,7 @@ public class Metadata {
                 timestamp = Instant.ofEpochSecond(Long.valueOf(parts[0]));
                 counter = Long.valueOf(parts[1]);
             } else {
+                timestamp = Instant.now();
                 counter = defaultValue;
             }
 
@@ -268,7 +269,7 @@ public class Metadata {
         }
 
         public long modifyCounter(final long delta) {
-            return modifyCounter(counter + delta);
+            return changeCounter(counter + delta);
         }
 
         public long reset() {
