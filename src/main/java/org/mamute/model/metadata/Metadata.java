@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,6 +113,51 @@ public class Metadata {
             return questionIds;
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    public Long getDailyVoteCount() {
+        final Optional<UserMetadata> searchResult = findMetadata(MetadataType.DAILY_VOTES);
+
+        if (searchResult.isPresent()) {
+            final UserMetadata metadata = searchResult.get();
+            final Instant now = Instant.now();
+
+            final String[] parts = metadata.getValue().split(":");
+            final Instant lastVote = Instant.ofEpochSecond(Long.valueOf(parts[0]));
+            final Long voteCount = Long.valueOf(parts[1]);
+
+            if (lastVote.truncatedTo(ChronoUnit.DAYS).equals(now.truncatedTo(ChronoUnit.DAYS))) {
+                return voteCount;
+            }
+        }
+
+        return 0L;
+    }
+
+    public void addDailyVoteCount(final long difference) {
+        final Optional<UserMetadata> searchResult = findMetadata(MetadataType.DAILY_VOTES);
+        final Instant now = Instant.now();
+
+        if (searchResult.isPresent()) {
+            final UserMetadata metadata = searchResult.get();
+
+            final String[] parts = metadata.getValue().split(":");
+            final Instant lastVote = Instant.ofEpochSecond(Long.valueOf(parts[0]));
+            final Long voteCount = Long.valueOf(parts[1]);
+            final String newValue;
+
+            if (lastVote.truncatedTo(ChronoUnit.DAYS).equals(now.truncatedTo(ChronoUnit.DAYS))) {
+                newValue = String.format("%d:%d", now.getEpochSecond(), voteCount + difference);
+            } else {
+                newValue = String.format("%d:%d", now.getEpochSecond(), difference);
+            }
+
+            metadata.setValue(newValue);
+        } else {
+            final String value = String.format("%d:%d", now.getEpochSecond(), difference);
+
+            user.setRawMetadata(MetadataType.DAILY_VOTES, value);
         }
     }
 

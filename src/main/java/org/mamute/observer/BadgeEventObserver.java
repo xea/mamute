@@ -91,6 +91,8 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(QUESTION_SCORE_25, this::questionAuthor, this::questionScore25));
                 evaluators.add(new Evaluator(QUESTION_SCORE_100, this::questionAuthor, this::questionScore100));
                 evaluators.add(new Evaluator(FIRST_UPVOTE, this::currentUser, this::firstUpvote));
+                evaluators.add(new Evaluator(USE_30_VOTES_A_DAY, this::currentUser, this::dailyVoteCount30));
+                evaluators.add(new Evaluator(USE_40_VOTES_A_DAY, this::currentUser, this::dailyVoteCount40));
                 /* not implemented yet
                 evaluators.add(new Evaluator(QUESTION_SERIES_5, this::questionAuthor, this::questionSeries5));
                 evaluators.add(new Evaluator(QUESTION_SERIES_30, this::questionAuthor, this::questionSeries30));
@@ -99,6 +101,8 @@ public class BadgeEventObserver {
                 break;
             case QUESTION_DOWNVOTE:
                 evaluators.add(new Evaluator(FIRST_DOWNVOTE, this::currentUser, this::firstDownvote));
+                evaluators.add(new Evaluator(USE_30_VOTES_A_DAY, this::currentUser, this::dailyVoteCount30));
+                evaluators.add(new Evaluator(USE_40_VOTES_A_DAY, this::currentUser, this::dailyVoteCount40));
                 break;
             case ANSWER_UPVOTE:
                 evaluators.add(new Evaluator(FIRST_ANSWER_ACCEPTED_SCORE_10, this::answerAuthor, this::firstAnswerAcceptedScore10));
@@ -112,9 +116,13 @@ public class BadgeEventObserver {
                 evaluators.add(new Evaluator(ANSWER_OWN_QUESTION_SCORE_2, this::answerAuthor, this::answerOwnScore2));
                 evaluators.add(new Evaluator(ANSWER_ACCEPTED_SCORE_40, this::answerAuthor, this::answerAcceptedScore40));
                 evaluators.add(new Evaluator(FIRST_UPVOTE, this::currentUser, this::firstUpvote));
+                evaluators.add(new Evaluator(USE_30_VOTES_A_DAY, this::currentUser, this::dailyVoteCount30));
+                evaluators.add(new Evaluator(USE_40_VOTES_A_DAY, this::currentUser, this::dailyVoteCount40));
                 break;
             case ANSWER_DOWNVOTE:
                 evaluators.add(new Evaluator(FIRST_DOWNVOTE, this::currentUser, this::firstDownvote));
+                evaluators.add(new Evaluator(USE_30_VOTES_A_DAY, this::currentUser, this::dailyVoteCount30));
+                evaluators.add(new Evaluator(USE_40_VOTES_A_DAY, this::currentUser, this::dailyVoteCount40));
                 break;
             case MARKED_SOLUTION:
                 evaluators.add(new Evaluator(FIRST_QUESTION_ACCEPTED, this::currentUser, this::acceptFirstSolution));
@@ -487,6 +495,20 @@ public class BadgeEventObserver {
 
     public boolean createTag50Questions(final TagUsage tagUsage) {
         final boolean award = tagUsage.getUsage() > 50;
+
+        return award;
+    }
+
+    public boolean dailyVoteCount30(final BadgeEvent event, final User user) {
+        return dailyVoteCount(user, 30);
+    }
+
+    public boolean dailyVoteCount40(final BadgeEvent event, final User user) {
+        return dailyVoteCount(user, 40);
+    }
+
+    public boolean dailyVoteCount(final User user, final long threshold) {
+        final boolean award = user.getMetadata().getDailyVoteCount() >= threshold;
 
         return award;
     }
