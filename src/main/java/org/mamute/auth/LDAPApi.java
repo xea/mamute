@@ -62,6 +62,7 @@ public class LDAPApi {
 	public static final String LDAP_USE_SSL = "ldap.useSSL";
 	public static final String LDAP_AVATAR_IMAGE = "ldap.avatarImageAttr";
 	public static final String DEFAULT_LOOKUP_CLASS = "user";
+	public static final String LDAP_MODERATORS = "feature.moderator.ldap";
 
 	@Inject private Environment env;
 	@Inject private UserDAO users;
@@ -84,6 +85,7 @@ public class LDAPApi {
 	private String moderatorGroup;
 	private Boolean useSsl;
 	private String avatarImageAttr;
+	private Boolean ldapModerator;
 
 	/**
 	 * Ensure that required variables are set if LDAP auth
@@ -109,6 +111,7 @@ public class LDAPApi {
 			lookupClass = env.get(LDAP_LOOKUP_CLASS, DEFAULT_LOOKUP_CLASS);
 			useSsl = env.supports(LDAP_USE_SSL);
 			avatarImageAttr = env.get(LDAP_AVATAR_IMAGE, "");
+			ldapModerator = Boolean.valueOf(env.get(LDAP_MODERATORS, "true"));
 		}
 	}
 
@@ -251,11 +254,14 @@ public class LDAPApi {
 		}
 
 		//update moderator status
-		if (isNotEmpty(moderatorGroup) && ldap.getGroups(ldapUser).contains(moderatorGroup)) {
-			user = user.asModerator();
-		} else {
-			user.removeModerator();
+		if (ldapModerator) {
+			if (isNotEmpty(moderatorGroup) && ldap.getGroups(ldapUser).contains(moderatorGroup)) {
+				user = user.asModerator();
+			} else {
+				user.removeModerator();
+			}
 		}
+
 		updateAvatarImage(ldap, ldapUser, user);
 
 		users.save(user);
