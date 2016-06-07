@@ -338,21 +338,21 @@ public class BadgeEventObserver {
     }
 
     public boolean answerOutscore2(final BadgeEvent event, final User user) {
-        return answerOutscore(event, 2);
+        return answerOutscore(event, 2, 5);
     }
 
     public boolean answerOutscore5(final BadgeEvent event, final User user) {
-        return answerOutscore(event, 5);
+        return answerOutscore(event, 5, 5);
     }
 
-    public boolean answerOutscore(final BadgeEvent event, final long multiplier) {
+    public boolean answerOutscore(final BadgeEvent event, final long multiplier, final long threshold) {
         final Answer answer = (Answer) event.getContext();
         final Answer solution = answer.getQuestion().getSolution();
 
         // TODO: this doesn't trigger well until there was an upvote *after* accepting another answer
 
         if (solution != null) {
-            if (answer.getVoteCount() / multiplier >= solution.getVoteCount()) {
+            if (solution.getVoteCount() > threshold && answer.getVoteCount() / multiplier >= solution.getVoteCount()) {
                 return true;
             }
         }
