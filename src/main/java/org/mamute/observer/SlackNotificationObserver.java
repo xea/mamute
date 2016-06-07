@@ -41,12 +41,13 @@ public class SlackNotificationObserver {
                     final String linkLabel = questionCreated.getQuestion().getTitle();
                     linker.linkTo(questionController).showQuestion(questionCreated.getQuestion(), questionCreated.getQuestion().getSluggedTitle());
                     final String questionUrl = linker.get();
+                    final String payload = getRequestPayload(userName, questionUrl, linkLabel);
 
                     final HttpClient client = new HttpClient();
                     final PostMethod method = new PostMethod(url.toURI().toString());
 
                     final StringRequestEntity entity = new StringRequestEntity(
-                            getRequestPayload(userName, questionUrl, linkLabel),
+                            payload,
                             "application/json",
                             "UTF-8"
                     );
@@ -60,7 +61,8 @@ public class SlackNotificationObserver {
                         //final String response = new String(method.getResponseBody());
                         logger.info("Sent slack notification");
                     } else {
-                        logger.error("Couldn't send slack notification, status code: " + status);
+                        logger.error("Couldn't send slack notification, status code: " + status + " response body: " + method.getResponseBodyAsString());
+                        logger.error("Submitted payload: %s" + payload);
                     }
 
                     method.releaseConnection();
