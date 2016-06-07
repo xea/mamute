@@ -80,6 +80,6 @@ public class SlackNotificationObserver {
     }
 
     private String getRequestPayload(final String userName, final String url, final String linkLabel) {
-        return String.format("{\"text\": \"%s has posted a new question to RTFM: <%s|%s>!\"}", userName, url, linkLabel);
+        return String.format("{\"text\": \"%s has posted a new question to RTFM: <%s|%s>\"}", userName, url, linkLabel);
     }
 }
