@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-public class LDAPAuthenticator implements Authenticator{
-	private static final Logger logger = LoggerFactory.getLogger(LDAPAuthenticator.class);
+public class LDAPAuthenticator implements Authenticator {
+
+    private final Logger logger = LoggerFactory.getLogger(LDAPAuthenticator.class);
+
 	@Inject private UserDAO users;
 	@Inject private Access system;
 	@Inject private LDAPApi ldap;
